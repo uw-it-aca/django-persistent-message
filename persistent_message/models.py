@@ -10,19 +10,37 @@ MESSAGE_ALLOWED_ATTRIBUTES['*'] = ['class', 'style', 'aria-hidden']
 MESSAGE_ALLOWED_STYLES = ['font-size', 'color']
 
 
+
+class TagGroup(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def to_json(self):
+        return {
+            'name': self.name,
+            'tags': [t.name for t in self.tag_set.all()],
+        }
+
+    def __str__(self):
+        return self.name
+
+
+class Tag(models.Model):
+    name = models.SlugField(unique=True)
+    group = models.ForeignKey(TagGroup, on_delete=models.CASCADE)
+
+    def to_json(self):
+        return {'name': self.name, 'group': str(self.group)}
+
+    def __str__(self):
+        return self.name
+
+
 class MessageManager(models.Manager):
     def get_current_messages(self):
         now = timezone.now()
         return super(MessageManager, self).get_queryset().filter(
             Q(expires__gt=now) | Q(expires__isnull=True),
             begins__lte=now).order_by('start')
-
-
-class MessageTag(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
 
 
 class Message(models.Model):
@@ -47,7 +65,7 @@ class Message(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=50)
-    tags = models.ManyToManyField(MessageTag)
+    tags = models.ManyToManyField(Tag)
 
     objects = MessageManager()
 
@@ -72,7 +90,7 @@ class Message(models.Model):
             'modified': self.modified.isoformat() if (
                 self.modified is not None) else None,
             'modified_by': self.modified_by,
-            'tags': [m.name for m in self.tags.all()],
+            'tags': [t.name for t in self.tags.all()],
         }
 
     @staticmethod

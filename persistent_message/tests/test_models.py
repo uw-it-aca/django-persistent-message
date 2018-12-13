@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from datetime import datetime, timedelta
-from persistent_message.models import Message, MessageTag
+from persistent_message.models import Message, Tag, TagGroup
 from unittest import mock
 
 
@@ -69,17 +69,20 @@ class MessageTest(TestCase):
         self.assertEqual(json_data['tags'], [])
 
     def test_tags(self):
-        tag1 = MessageTag(name='student')
+        group = TagGroup(name='city')
+        group.save()
+
+        tag1 = Tag(name='seattle', group=group)
         tag1.save()
 
-        tag2 = MessageTag(name='staff')
+        tag2 = Tag(name='tacoma', group=group)
         tag2.save()
 
         self.message.save()
         self.message.tags.add(tag1, tag2)
 
         json_data = self.message.to_json()
-        self.assertEqual(json_data['tags'], ['student', 'staff'])
+        self.assertEqual(json_data['tags'], ['seattle', 'tacoma'])
 
     def test_str(self):
         self.assertEqual(str(self.message), 'Hello World!')
@@ -116,13 +119,40 @@ class MessageTest(TestCase):
             '&lt;script&gt;alert("x");&lt;/script&gt;')
 
 
-class MessageTagTest(TestCase):
+class TagTest(TestCase):
     def setUp(self):
-        self.tag = MessageTag(name='student')
+        group = TagGroup(name='city')
+        group.save()
+
+        self.tag = Tag(name='seattle', group=group)
+        self.tag.save()
+
+    def test_json(self):
+        self.assertEqual(
+            self.tag.to_json(), {'group': 'city', 'name': 'seattle'})
 
     def test_str(self):
-        self.assertEqual(str(self.tag), 'student')
+        self.assertEqual(str(self.tag), 'seattle')
 
+
+class TagGroupTest(TestCase):
+    def setUp(self):
+        self.group = TagGroup(name='city')
+        self.group.save()
+
+    def test_str(self):
+        self.assertEqual(str(self.group), 'city')
+
+    def test_json(self):
+        tag1 = Tag(name='seattle', group=self.group)
+        tag1.save()
+
+        tag2 = Tag(name='tacoma', group=self.group)
+        tag2.save()
+
+        self.assertEqual(
+            self.group.to_json(),
+            {'name': 'city', 'tags': ['seattle', 'tacoma']})
 
 class MessageManagerTest(TestCase):
     def test_get_current_messages(self):
