@@ -154,6 +154,7 @@ class TagGroupTest(TestCase):
             self.group.to_json(),
             {'name': 'city', 'tags': ['seattle', 'tacoma']})
 
+
 class MessageManagerTest(TestCase):
     def test_get_current_messages(self):
         pass
