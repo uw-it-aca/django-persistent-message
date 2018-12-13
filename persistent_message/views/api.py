@@ -1,5 +1,5 @@
-from persistent_message.models import PersistentMessage
-from PersistentMessage.decorators import message_admin_required
+from persistent_message.models import Message
+from persistent_message.decorators import message_admin_required
 from django.http import HttpResponse
 from django.views import View
 from django.utils.decorators import method_decorator
@@ -10,33 +10,33 @@ logger = getLogger(__name__)
 
 
 @method_decorator(message_admin_required, name='dispatch')
-class PersistentMessageAPI(View):
+class MessageAPI(View):
     def get(self, request, *args, **kwargs):
         try:
             message_id = kwargs['message_id']
             try:
-                message = PersistentMessage.objects.get(pk=message_id)
+                message = Message.objects.get(pk=message_id)
                 return self.json_response({'message': message.json_data()})
-            except PersistentMessage.DoesNotExist:
+            except Message.DoesNotExist:
                 return self.error_response(
                     404, 'Message {} not found'.format(message_id))
         except KeyError:
             messages = []
-            for message in PersistentMessage.objects.all():
+            for message in Message.objects.all():
                 messages.append(message.json_data())
             return self.json_response({'messages': messages})
 
     def put(self, request, *args, **kwargs):
         try:
             message_id = kwargs['message_id']
-            message = PersistentMessage.objects.get(pk=message_id)
-        except PersistentMessage.DoesNotExist:
+            message = Message.objects.get(pk=message_id)
+        except Message.DoesNotExist:
             return self.error_response(
                 404, 'Message {} not found'.format(message_id))
         except KeyError:
             return self.error_response(400, 'Missing message ID')
 
-        message = PersistentMessage()
+        message = Message()
         # TODO
         message.store()
 
@@ -45,7 +45,7 @@ class PersistentMessageAPI(View):
         return self.json_response({'message': message.json_data()})
 
     def post(self, request, *args, **kwargs):
-        message = PersistentMessage()
+        message = Message()
         # TODO
         message.store()
 
@@ -56,8 +56,8 @@ class PersistentMessageAPI(View):
     def delete(self, request, *args, **kwargs):
         try:
             message_id = kwargs['message_id']
-            message = PersistentMessage.objects.get(pk=message_id)
-        except PersistentMessage.DoesNotExist:
+            message = Message.objects.get(pk=message_id)
+        except Message.DoesNotExist:
             return self.error_response(
                 404, 'Message {} not found'.format(message_id))
         except KeyError:

@@ -10,7 +10,6 @@ MESSAGE_ALLOWED_ATTRIBUTES['*'] = ['class', 'style', 'aria-hidden']
 MESSAGE_ALLOWED_STYLES = ['font-size', 'color']
 
 
-
 class TagGroup(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
