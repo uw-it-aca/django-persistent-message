@@ -1,0 +1,27 @@
+sudo: false
+language: python
+python:
+- '3.6'
+before_script:
+- pip install -e .
+- pip install pycodestyle
+- pip install coverage
+- pip install coveralls
+- cp travis-ci/manage.py manage.py
+script:
+- pycodestyle persistent_message/ --exclude=migrations
+- python -m compileall persistent_message/
+- coverage run --source=persistent_message/ manage.py test persistent_message
+after_success:
+- coveralls
+before_deploy:
+- find persistent_message/ -name \*.pyc -exec rm {} \;
+- echo $TRAVIS_TAG > persistent_message/VERSION
+deploy:
+  provider: pypi
+  user: uw-it-aca
+  skip_cleanup: true
+  password:
+  on:
+    tags: true
+    python: '3.6'
