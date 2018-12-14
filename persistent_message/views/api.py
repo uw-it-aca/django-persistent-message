@@ -16,14 +16,15 @@ class MessageAPI(View):
             message_id = kwargs['message_id']
             try:
                 message = Message.objects.get(pk=message_id)
-                return self.json_response({'message': message.json_data()})
+                return self.json_response({'message': message.to_json()})
             except Message.DoesNotExist:
                 return self.error_response(
                     404, 'Message {} not found'.format(message_id))
         except KeyError:
             messages = []
-            for message in Message.objects.all().order_by('-end', '-start'):
-                messages.append(message.json_data())
+            for message in Message.objects.all().order_by(
+                    '-expires', '-begins'):
+                messages.append(message.to_json())
             return self.json_response({'messages': messages})
 
     def put(self, request, *args, **kwargs):

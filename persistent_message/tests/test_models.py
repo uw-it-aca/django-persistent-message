@@ -1,13 +1,9 @@
 from django.test import TestCase
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 from persistent_message.models import Message, Tag, TagGroup
+from persistent_message.tests import mocked_current_datetime
 from unittest import mock
-
-
-def mocked_current_datetime():
-    dt = datetime(2018, 1, 1, 10, 10, 10)
-    return timezone.make_aware(dt)
 
 
 class MessageTest(TestCase):
