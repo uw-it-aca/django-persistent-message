@@ -1,1 +1,67 @@
-TODO
+{% extends 'supporttools/base.html' %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <h2>Persistent Messages</h2>
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h3 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">Add a new message</a></h3>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                <div class="panel-body">
+                    Form
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingTwo">
+                <h3 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">Existing messsages</a></h3>
+            </div>
+            <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingTwo">
+                <div id="existing-messages" class="panel-body">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% verbatim %}
+<script id="message-list-tmpl" type="text/x-handlebars-template">
+{{# if messsages}}
+<ul class="list-group">
+{{# each messages}}
+    <li class="list-group-item">
+        <div>
+            <div style="padding: 10px 15px;font-size: 15px;text-align: center;border:1px solid #333;background-color:#fff;margin:10px 0;">{{{ content }}}</div>
+            <em>Last updated by {{ modified_by }} on {{ modified }}</em>
+            <div class="text-right">
+                <button class="btn btn-danger" name="action">Delete</button>
+                {{# if is_actve}}
+                <button class="btn btn-success" name="action">Unpublish</button>
+                {{else}}
+                <button class="btn btn-primary" name="action">Publish</button>
+                {{/if}}
+            </div>
+            <dl class="dl-horizontal">
+                <dt>Level</dt>
+                <dd>{{ level }}</dd>
+                <dt>Published</dt>
+                <dd>{{ is_active }}</dd>
+                <dt>Published dates</dt>
+                <dd>{{ begins }} to {{ expires }}</dd>
+                {{# each groups}}
+                <dt>{{ name }}</dt>
+                <dd>{{# each tags}}{{ tag }} {{/each}}</dd>
+                {{/each}}
+            </dl>
+        </div>
+    </li>
+{{/each}}
+</ul>
+{{else}}
+<p>There are no messages.</p>
+{{/if}}
+</script>
+{% endverbatim %}
+{% endblock content %}

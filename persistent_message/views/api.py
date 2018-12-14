@@ -22,7 +22,7 @@ class MessageAPI(View):
                     404, 'Message {} not found'.format(message_id))
         except KeyError:
             messages = []
-            for message in Message.objects.all():
+            for message in Message.objects.all().order_by('-end', '-start'):
                 messages.append(message.json_data())
             return self.json_response({'messages': messages})
 
@@ -36,8 +36,6 @@ class MessageAPI(View):
         except KeyError:
             return self.error_response(400, 'Missing message ID')
 
-        message = Message()
-        # TODO
         message.store()
 
         logger.info('')  # TODO

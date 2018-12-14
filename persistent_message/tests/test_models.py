@@ -44,15 +44,42 @@ class MessageTest(TestCase):
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
-    def test_message_expire(self, mock_obj):
+    def test_message_active(self, mock_obj):
+        # Expires not defined
+        self.message.save()
+        self.assertEqual(self.message.begins.isoformat(),
+                         '2018-01-01T10:10:10+00:00')
+        self.assertEqual(self.message.expires, None)
+        self.assertEqual(self.message.is_active(), True)
+
+        # Begins is past, expires is future
+        self.message.expires = mocked_current_datetime() + timedelta(days=7)
+        self.message.save()
+        self.assertEqual(self.message.begins.isoformat(),
+                         '2018-01-01T10:10:10+00:00')
+        self.assertEqual(self.message.expires.isoformat(),
+                         '2018-01-08T10:10:10+00:00')
+        self.assertEqual(self.message.is_active(), True)
+
+        # Begins and expires are past
+        self.message.begins = mocked_current_datetime() - timedelta(days=15)
+        self.message.expires = mocked_current_datetime() - timedelta(days=7)
+        self.message.save()
+        self.assertEqual(self.message.begins.isoformat(),
+                         '2017-12-17T10:10:10+00:00')
+        self.assertEqual(self.message.expires.isoformat(),
+                         '2017-12-25T10:10:10+00:00')
+        self.assertEqual(self.message.is_active(), False)
+
+        # Begins and expires are future
         self.message.begins = mocked_current_datetime() + timedelta(days=1)
         self.message.expires = mocked_current_datetime() + timedelta(days=7)
         self.message.save()
-
         self.assertEqual(self.message.begins.isoformat(),
                          '2018-01-02T10:10:10+00:00')
         self.assertEqual(self.message.expires.isoformat(),
                          '2018-01-08T10:10:10+00:00')
+        self.assertEqual(self.message.is_active(), False)
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
@@ -88,6 +115,9 @@ class MessageTest(TestCase):
         self.assertEqual(str(self.message), 'Hello World!')
 
     def test_sanitize_content(self):
+        self.assertRaises(TypeError, self.message.sanitize_content, None)
+        self.assertRaises(TypeError, self.message.sanitize_content, 1.75)
+
         self.assertEqual(
             self.message.sanitize_content('Hello World!'),
             'Hello World!')
@@ -129,7 +159,8 @@ class TagTest(TestCase):
 
     def test_json(self):
         self.assertEqual(
-            self.tag.to_json(), {'group': 'city', 'name': 'seattle'})
+            self.tag.to_json(),
+            {'id': 1, 'group': 'city', 'name': 'seattle'})
 
     def test_str(self):
         self.assertEqual(str(self.tag), 'seattle')
@@ -140,21 +171,63 @@ class TagGroupTest(TestCase):
         self.group = TagGroup(name='city')
         self.group.save()
 
-    def test_str(self):
-        self.assertEqual(str(self.group), 'city')
-
-    def test_json(self):
         tag1 = Tag(name='seattle', group=self.group)
         tag1.save()
 
         tag2 = Tag(name='tacoma', group=self.group)
         tag2.save()
 
+    def test_str(self):
+        self.assertEqual(str(self.group), 'city')
+
+    def test_json(self):
         self.assertEqual(
             self.group.to_json(),
-            {'name': 'city', 'tags': ['seattle', 'tacoma']})
+            {'id': 1, 'name': 'city', 'tags': ['seattle', 'tacoma']})
 
 
 class MessageManagerTest(TestCase):
-    def test_get_current_messages(self):
-        pass
+    @mock.patch('persistent_message.models.Message.current_datetime',
+                side_effect=mocked_current_datetime)
+    def setUp(self, mock_obj):
+        group = TagGroup(name='city')
+        group.save()
+
+        tag1 = Tag(name='seattle', group=group)
+        tag1.save()
+
+        tag2 = Tag(name='tacoma', group=group)
+        tag2.save()
+
+        message1 = Message(content='1')
+        message1.save()
+        message1.tags.add(tag1)
+
+        message2 = Message(content='2')
+        message2.expires = mocked_current_datetime()
+        message2.save()
+        message2.tags.add(tag2)
+
+        message3 = Message(content='3')
+        message3.save()
+
+        message4 = Message(content='4', level=Message.WARNING_LEVEL)
+        message4.save()
+        message4.tags.add(tag1, tag2)
+
+    def test_all_messages(self):
+        results = Message.objects.all()
+        self.assertEqual([str(m) for m in results], ['1', '2', '3', '4'])
+
+    @mock.patch('persistent_message.models.Message.current_datetime',
+                side_effect=mocked_current_datetime)
+    def test_active_messages(self, mock_obj):
+        results = Message.objects.active_messages()
+        self.assertEqual([str(m) for m in results], ['4', '1', '3'])
+
+        results = Message.objects.active_messages(
+            tags=['seattle', 'tacoma'])
+        self.assertEqual([str(m) for m in results], ['4', '1'])
+
+        results = Message.objects.active_messages(level=Message.WARNING_LEVEL)
+        self.assertEqual([str(m) for m in results], ['4'])

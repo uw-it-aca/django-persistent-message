@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib import messages
 from django.utils import timezone
 import bleach
@@ -15,6 +16,7 @@ class TagGroup(models.Model):
 
     def to_json(self):
         return {
+            'id': self.pk,
             'name': self.name,
             'tags': [t.name for t in self.tag_set.all()],
         }
@@ -28,18 +30,30 @@ class Tag(models.Model):
     group = models.ForeignKey(TagGroup, on_delete=models.CASCADE)
 
     def to_json(self):
-        return {'name': self.name, 'group': str(self.group)}
+        return {
+            'id': self.pk,
+            'name': self.name,
+            'group': str(self.group),
+        }
 
     def __str__(self):
         return self.name
 
 
 class MessageManager(models.Manager):
-    def get_current_messages(self):
-        now = timezone.now()
+    def active_messages(self, level=None, tags=[]):
+        now = Message.current_datetime()
+
+        kwargs = {'begins__lte': now}
+        if level is not None:
+            kwargs['level'] = level
+
+        if len(tags):
+            kwargs['tags__name__in'] = tags
+
         return super(MessageManager, self).get_queryset().filter(
-            Q(expires__gt=now) | Q(expires__isnull=True),
-            begins__lte=now).order_by('start')
+            Q(expires__gt=now) | Q(expires__isnull=True), **kwargs).order_by(
+                '-level', '-begins').distinct()
 
 
 class Message(models.Model):
@@ -68,6 +82,11 @@ class Message(models.Model):
 
     objects = MessageManager()
 
+    def is_active(self):
+        now = self.current_datetime()
+        return (self.begins is not None and self.begins <= now and (
+            self.expires is None or now <= self.expires))
+
     def save(self, *args, **kwargs):
         self.content = self.sanitize_content(self.content)
 
@@ -78,6 +97,7 @@ class Message(models.Model):
 
     def to_json(self):
         return {
+            'id': self.pk,
             'content': self.content,
             'level': self.level,
             'begins': self.begins.isoformat() if (
@@ -90,6 +110,7 @@ class Message(models.Model):
                 self.modified is not None) else None,
             'modified_by': self.modified_by,
             'tags': [t.name for t in self.tags.all()],
+            'is_active': self.is_active(),
         }
 
     @staticmethod
