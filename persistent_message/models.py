@@ -64,11 +64,11 @@ class Message(models.Model):
     DANGER_LEVEL = messages.ERROR
 
     LEVEL_CHOICES = (
-        (DEBUG_LEVEL, 'Debug'),
-        (INFO_LEVEL, 'Information'),
-        (SUCCESS_LEVEL, 'Success'),
-        (WARNING_LEVEL, 'Warning'),
-        (DANGER_LEVEL, 'Danger'),
+        (DEBUG_LEVEL, 'debug'),
+        (INFO_LEVEL, 'info'),
+        (SUCCESS_LEVEL, 'success'),
+        (WARNING_LEVEL, 'warning'),
+        (DANGER_LEVEL, 'danger'),
     )
 
     content = models.TextField()

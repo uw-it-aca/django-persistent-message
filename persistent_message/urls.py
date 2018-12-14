@@ -1,5 +1,5 @@
 from django.urls import re_path
-from persistent_message.views.admin import manage
+from persistent_message.views import manage
 from persistent_message.views.api import MessageAPI
 
 
