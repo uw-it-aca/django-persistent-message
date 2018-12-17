@@ -75,7 +75,7 @@ class MessageAPI(View):
 
         message.delete()
 
-        logger.info('Message ({}) deleted'.format(self.message.pk))
+        logger.info('Message ({}) deleted'.format(message.pk))
         return self.json_response({})
 
     def error_response(self, status, message='', content={}):
