@@ -13,7 +13,7 @@ class MessageTest(TestCase):
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
-    def test_attr(self, mock_obj):
+    def test_attr(self, mock_dt):
         # Unsaved model
         self.assertEqual(self.message.pk, None)
         self.assertEqual(self.message.content, 'Hello World!')
@@ -40,7 +40,7 @@ class MessageTest(TestCase):
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
-    def test_message_active(self, mock_obj):
+    def test_message_active(self, mock_dt):
         # Expires not defined
         self.message.save()
         self.assertEqual(self.message.begins.isoformat(),
@@ -79,7 +79,7 @@ class MessageTest(TestCase):
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
-    def test_json(self, mock_obj):
+    def test_json(self, mock_dt):
         self.message.modified_by = 'javerage'
         self.message.save()
 
@@ -185,7 +185,7 @@ class TagGroupTest(TestCase):
 class MessageManagerTest(TestCase):
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
-    def setUp(self, mock_obj):
+    def setUp(self, mock_dt):
         group = TagGroup(name='city')
         group.save()
 
@@ -200,7 +200,7 @@ class MessageManagerTest(TestCase):
         message1.tags.add(tag1)
 
         message2 = Message(content='2')
-        message2.expires = mocked_current_datetime()
+        message2.begins = mocked_current_datetime() + timedelta(days=7)
         message2.save()
         message2.tags.add(tag2)
 
@@ -217,7 +217,7 @@ class MessageManagerTest(TestCase):
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
-    def test_active_messages(self, mock_obj):
+    def test_active_messages(self, mock_dt):
         results = Message.objects.active_messages()
         self.assertEqual([str(m) for m in results], ['4', '1', '3'])
 

@@ -1,9 +1,11 @@
-from persistent_message.models import Message
+from persistent_message.models import Message, Tag
 from persistent_message.decorators import message_admin_required
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from logging import getLogger
+import dateutil.parser
 import json
 
 logger = getLogger(__name__)
@@ -30,27 +32,36 @@ class MessageAPI(View):
     def put(self, request, *args, **kwargs):
         try:
             message_id = kwargs['message_id']
-            message = Message.objects.get(pk=message_id)
+            self.message = Message.objects.get(pk=message_id)
         except Message.DoesNotExist:
             return self.error_response(
                 404, 'Message {} not found'.format(message_id))
         except KeyError:
             return self.error_response(400, 'Missing message ID')
 
-        message.store()
+        try:
+            tags = self._deserialize(request)
+            self.message.save()
+            self.message.tags.clear()
+            self.message.tags.add(*tags)
+        except ValidationError as ex:
+            return self.error_response(400, ex)
 
-        logger.info('')  # TODO
-
-        return self.json_response({'message': message.json_data()})
+        logger.info('Message ({}) updated'.format(self.message.pk))
+        return self.json_response({'message': self.message.to_json()})
 
     def post(self, request, *args, **kwargs):
-        message = Message()
-        # TODO
-        message.store()
+        self.message = Message()
 
-        logger.info('')  # TODO
+        try:
+            tags = self._deserialize(request)
+            self.message.save()
+            self.message.tags.add(*tags)
+        except ValidationError as ex:
+            return self.error_response(400, ex)
 
-        return self.json_response({'message': message.json_data()})
+        logger.info('Message ({}) created'.format(self.message.pk))
+        return self.json_response({'message': self.message.to_json()})
 
     def delete(self, request, *args, **kwargs):
         try:
@@ -64,9 +75,8 @@ class MessageAPI(View):
 
         message.delete()
 
-        logger.info('')  # TODO
-
-        return self.json_response()
+        logger.info('Message ({}) deleted'.format(self.message.pk))
+        return self.json_response({})
 
     def error_response(self, status, message='', content={}):
         content['error'] = '{}'.format(message)
@@ -78,3 +88,31 @@ class MessageAPI(View):
         return HttpResponse(json.dumps(content),
                             status=status,
                             content_type='application/json')
+
+    def _deserialize(self, request):
+        try:
+            json_data = json.loads(request.body)['message']
+        except Exception as ex:
+            raise ValidationError('Invalid JSON: {}'.format(request.body))
+
+        try:
+            self.message.content = json_data['content']
+            self.message.level = json_data.get('level', Message.INFO_LEVEL)
+            begins = json_data.get('begins')
+            self.message.begins = dateutil.parser.parse(begins) if (
+                begins is not None) else None
+            expires = json_data.get('expires')
+            self.message.expires = dateutil.parser.parse(expires) if (
+                expires is not None) else None
+            self.message.modified_by = request.user.username
+        except KeyError as ex:
+            raise ValidationError('Missing: {}'.format(ex))
+
+        tags = []
+        for name in json_data.get('tags', []):
+            try:
+                tags.append(Tag.objects.get(name=name))
+            except Tag.DoesNotExist:
+                raise ValidationError('Invalid tag: {}'.format(name))
+
+        return tags
