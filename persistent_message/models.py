@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Q
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 import bleach
 
@@ -64,17 +65,17 @@ class Message(models.Model):
     DANGER_LEVEL = messages.ERROR
 
     LEVEL_CHOICES = (
-        (DEBUG_LEVEL, 'Debug'),
-        (INFO_LEVEL, 'Information'),
-        (SUCCESS_LEVEL, 'Success'),
-        (WARNING_LEVEL, 'Warning'),
-        (DANGER_LEVEL, 'Danger'),
+        (DEBUG_LEVEL, 'debug'),
+        (INFO_LEVEL, 'info'),
+        (SUCCESS_LEVEL, 'success'),
+        (WARNING_LEVEL, 'warning'),
+        (DANGER_LEVEL, 'danger'),
     )
 
-    content = models.TextField()
+    content = models.TextField(blank=True)
     level = models.IntegerField(choices=LEVEL_CHOICES, default=INFO_LEVEL)
     begins = models.DateTimeField()
-    expires = models.DateTimeField(null=True)
+    expires = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=50)
@@ -87,12 +88,17 @@ class Message(models.Model):
         return (self.begins is not None and self.begins <= now and (
             self.expires is None or now <= self.expires))
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         self.content = self.sanitize_content(self.content)
 
-        if (self.begins is None):
+        if (self.begins is None or self.begins == ''):
             self.begins = self.current_datetime()
 
+        if (self.expires is not None and self.expires <= self.begins):
+            raise ValidationError('Invalid expires: expires precedes begins')
+
+    def save(self, *args, **kwargs):
+        self.full_clean(exclude=['begins', 'modified_by'])
         super(Message, self).save(*args, **kwargs)
 
     def to_json(self):

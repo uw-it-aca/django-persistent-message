@@ -24,6 +24,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'Django>=2.1,<3.0',
+        'python-dateutil',
         'bleach',
     ],
     license='Apache License, Version 2.0',

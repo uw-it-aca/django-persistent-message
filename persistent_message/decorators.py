@@ -22,6 +22,6 @@ def message_admin_required(view_func):
         if auth_func(request):
             return view_func(request, *args, **kwargs)
 
-        return render(request, 'no_access.html', status=401)
+        return render(request, 'access_denied.html', status=401)
 
     return login_required(function=wrapper)

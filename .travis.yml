@@ -7,9 +7,11 @@ before_script:
 - pip install pycodestyle
 - pip install coverage
 - pip install coveralls
+- npm install -g jshint
 - cp travis-ci/manage.py manage.py
 script:
 - pycodestyle persistent_message/ --exclude=migrations
+- jshint persistent_message/static/persistent_message/js/ --verbose
 - python -m compileall persistent_message/
 - coverage run --source=persistent_message/ manage.py test persistent_message
 after_success:
