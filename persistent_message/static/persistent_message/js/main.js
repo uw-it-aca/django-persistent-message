@@ -116,8 +116,7 @@
         }
 
         function load_form(data) {
-            data['tag_groups'] = get_tags();
-            console.log(data);
+            data.tag_groups = get_tags();
             var template = Handlebars.compile($('#message-form-tmpl').html());
             $('#pm-content').html(template(data));
             //$('#pm-header').html(data.name);
