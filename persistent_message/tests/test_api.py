@@ -4,9 +4,40 @@ from django.urls import reverse
 from datetime import timedelta
 from persistent_message.models import Message, Tag, TagGroup
 from persistent_message.tests import mocked_current_datetime
-from persistent_message.views.api import MessageAPI
+from persistent_message.views.api import MessageAPI, TagGroupAPI
 from unittest import mock
 import json
+
+
+class TagGroupAPITest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = User.objects.create_superuser(
+            username='manager', email='manager@...', password='top_secret')
+
+        group1 = TagGroup(name='city')
+        group1.save()
+
+        group2 = TagGroup(name='state')
+        group2.save()
+
+        tag1 = Tag(name='seattle', group=group1)
+        tag1.save()
+
+        tag2 = Tag(name='tacoma', group=group1)
+        tag2.save()
+
+        tag3 = Tag(name='washington', group=group2)
+        tag3.save()
+
+    def test_get(self):
+        request = self.factory.get(reverse('tag_groups_api'))
+        request.user = self.user
+        response = TagGroupAPI.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(len(data['tag_groups']), 2)
 
 
 class MessageAPITest(TestCase):

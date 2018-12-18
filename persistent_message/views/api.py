@@ -1,4 +1,4 @@
-from persistent_message.models import Message, Tag
+from persistent_message.models import Message, TagGroup, Tag
 from persistent_message.decorators import message_admin_required
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
@@ -116,3 +116,14 @@ class MessageAPI(View):
                 raise ValidationError('Invalid tag: {}'.format(name))
 
         return tags
+
+
+@method_decorator(message_admin_required, name='dispatch')
+class TagGroupAPI(View):
+    def get(self, request, *args, **kwargs):
+        groups = []
+        for group in TagGroup.objects.all():
+            groups.append(group.to_json())
+
+        return HttpResponse(json.dumps({'tag_groups': groups}),
+                            content_type='application/json')
