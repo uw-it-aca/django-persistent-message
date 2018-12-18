@@ -33,7 +33,19 @@
             }
         });
 
-        function get_form() {
+        var tag_cache;
+        function get_tags(callback) {
+            if (tag_cache === undefined) {
+                $.ajax({
+                    url: window.persistent_message.tags_api,
+                    dataType: 'json',
+                    async: false,
+                }).done(function (data) {tag_cache = data;});
+            }
+            return tag_cache;
+        }
+
+        function get_message() {
             return $.ajax({
                 url: window.persistent_message.message_api,
                 dataType: 'json'
@@ -104,18 +116,20 @@
         }
 
         function load_form(data) {
-            var template = Handlebars.compile($('#form-tmpl').html());
+            data['tag_groups'] = get_tags();
+            console.log(data);
+            var template = Handlebars.compile($('#message-form-tmpl').html());
             $('#pm-content').html(template(data));
-            $('#pm-header').html(data.name);
+            //$('#pm-header').html(data.name);
             $('button.pm-btn-submit').click(add_message);
-            $('#pm-form-content').focus();
+            $('#pm-message-content').focus();
         }
 
         function load_messages(data) {
-            var template = Handlebars.compile($('#messages-tmpl').html());
+            var template = Handlebars.compile($('#message-list-tmpl').html());
             $('#pm-content').html(template(data));
             $('#pm-header').html('Messages');
-            $('a.pm-btn-publish').click(publish_message);
+            //$('a.pm-btn-publish').click(publish_message);
             $('a.pm-btn-delete').click(delete_message);
         }
 
@@ -138,16 +152,16 @@
             get_messages().fail(load_error).done(load_messages);
         }
 
-        function init_form() {
-            $('#pm-form-link').tab('show');
-            get_form().fail(load_error).done(load_form);
+        function init_add_message() {
+            var data = {'message': {}};
+            $('#pm-message-add-link').tab('show');
+            load_form(data);
         }
 
         function initialize() {
-            $('#pm-form-link').click(init_form);
+            $('#pm-message-add-link').click(init_add_message);
             $('#pm-messages-link').click(init_messages);
-            $('#pm-accordion').accordion({collapsible: true, active: false});
-            init_form();
+            init_messages();
         }
 
         initialize();

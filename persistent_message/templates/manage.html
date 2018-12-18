@@ -1,34 +1,20 @@
-{% extends 'supporttools/base.html' %}
+{% extends wrapper_template %}
+
+{% load staticfiles %}
 
 {% block content %}
-<div class="container" style="max-width: 800px;">
+<div class="container">
     <h2>Persistent Messages</h2>
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="headingOne">
-                <h3 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">Add a new message</a></h3>
-            </div>
-            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                <div class="panel-body">
-                    Form
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="headingTwo">
-                <h3 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">Existing messsages</a></h3>
-            </div>
-            <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingTwo">
-                <div id="existing-messages" class="panel-body">
-                </div>
-            </div>
-        </div>
-    </div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation"><a href="#" class="nav-link active pm-btn-messages" id="pm-messages-link" role="tab" title="Existing messages">Existing messages</a></li>
+        <li class="nav-item" role="presentation"><a href="#" class="nav-link pm-btn-add-message" id="pm-message-add-link" aria-controls="add_message" role="tab" title="Add a new message" aria-selected="false">Add a new message</a></li>
+    </ul>
+    <div id="pm-content"></div>
 </div>
 
 {% verbatim %}
 <script id="message-list-tmpl" type="text/x-handlebars-template">
-{{# if messsages}}
+{{# if messages}}
 <ul class="list-group">
 {{# each messages}}
     <li class="list-group-item">
@@ -64,4 +50,66 @@
 {{/if}}
 </script>
 {% endverbatim %}
+
+{% verbatim %}
+<script id="message-form-tmpl" type="text/x-handlebars-template">
+<div class="row">
+	<div class="form-group col-xs-6">
+		<label for="pm-message-begin-date">Begin date</label><br />
+		<input id="pm-message-begin-date" name="begins_date" type="text" class="form-control" placeholder="YYYY-MM-DD" value="{{ message.begins_date }}">
+	</div>
+	<div class="form-group col-xs-6">
+		<label for="pm-message-begins-time">Begin time</label><br />
+		<input id="pm-message-begins-time" name="begins_time" type="text" class="form-control" value="{{ message.begins_time }}" />
+	</div>
+</div>
+<div class="row">
+    <div class="form-group col-xs-6">
+		<label for="pm-message-expires-date">Expire date</label><br />
+		<input id="pm-message-expires-date" name="expires_date" type="text" class="form-control" class="form-control" placeholder="YYYY-MM-DD" value="{{ message.expires_date }}">
+	</div>
+	<div class="form-group col-xs-6">
+		<label for="pm-message-expires-time">Expire time</label><br />
+		<input id="pm-message-expires-time" name="expires_time" type="text" class="form-control" value="{{ message.expires_time }}" />
+	</div>
+</div>
+{{# each tag_groups}}
+<h4>{{ name }}</h4>
+<div class="form-group">
+    {{#each tags}}
+    <label for="pm-tag-{{ name }}" class="checkbox-inline"><input type="checkbox" id="pm-tag-{{ name }}" name="{{ ../name }}" value="{{ name }}">{{ name }}</label>
+    {{/each}}
+</div>
+{{/each}}
+<h3>Message</h3>
+<div class="row">
+    <div class="form-group col-xs-10">
+    <label for="pm-message-content">Message</label><br />
+    <textarea id="pm-message-content" class="form-control" rows="2" name="content" value="{{ message.content }}"></textarea>
+    </div>
+</div>
+<button type="submit" class="btn btn-primary">Submit</button>
+</script>
+{% endverbatim %}
+
+{% verbatim %}
+<script id="transition-tmpl" type="text/x-handlebars-template">
+<div class="loading-container">
+    <div class="loading"></div>
+    <div><strong>Loading...</strong></div>
+</div>
+</script>
+{% endverbatim %}
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static "persistent_message/js/main.js" %}"></script>
+<script type="text/javascript">
+    window.persistent_message = {
+        session_id: '{{ session_id }}',
+        csrftoken: '{{ csrf_token }}',
+        message_api: '{{ message_api }}',
+        tags_api: '{{ tags_api }}',
+    };
+</script>
+{% endblock extra_js %}
