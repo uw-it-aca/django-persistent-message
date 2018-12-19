@@ -4,12 +4,32 @@ from django.urls import reverse
 from datetime import timedelta
 from persistent_message.models import Message, Tag, TagGroup
 from persistent_message.tests import mocked_current_datetime
-from persistent_message.views.api import MessageAPI
+from persistent_message.views.api import MessageAPI, TagGroupAPI
 from unittest import mock
 import json
 
 
+class TagGroupAPITest(TestCase):
+    fixtures = ['test.json']
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = User.objects.create_superuser(
+            username='manager', email='manager@...', password='top_secret')
+
+    def test_get(self):
+        request = self.factory.get(reverse('tag_groups_api'))
+        request.user = self.user
+        response = TagGroupAPI.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(len(data['tag_groups']), 2)
+
+
 class MessageAPITest(TestCase):
+    fixtures = ['test.json']
+
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
     def setUp(self, mock_dt):
@@ -17,14 +37,8 @@ class MessageAPITest(TestCase):
         self.user = User.objects.create_superuser(
             username='manager', email='manager@...', password='top_secret')
 
-        group = TagGroup(name='city')
-        group.save()
-
-        tag1 = Tag(name='seattle', group=group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group)
-        tag2.save()
+        tag1 = Tag.objects.get(name='Seattle')
+        tag2 = Tag.objects.get(name='Tacoma')
 
         message1 = Message(content='1')
         message1.save()
@@ -49,7 +63,7 @@ class MessageAPITest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
-        self.assertEqual(len(data['messages']), 4)
+        self.assertEqual(len(data['messages']), 5)
 
     def test_get_one(self):
         url = reverse('message_api', kwargs={'message_id': '1'})
@@ -60,17 +74,19 @@ class MessageAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertEqual(data.get('message').get('id'), 1)
-        self.assertEqual(data.get('message').get('content'), '1')
+        self.assertEqual(data.get('message').get('content'), 'This is a test.')
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
     def test_put(self, mock_dt):
-        message = Message.objects.get(pk=4)
+        message = Message.objects.get(content='4')
         json_data = message.to_json()
 
         self.assertEqual(json_data['content'], '4')
         self.assertEqual(json_data['level'], Message.WARNING_LEVEL)
-        self.assertEqual(json_data['tags'], ['seattle', 'tacoma'])
+        self.assertEqual(json_data['tags'], [
+            {'group': 'Cities', 'id': 3, 'name': 'Seattle'},
+            {'group': 'Cities', 'id': 4, 'name': 'Tacoma'}])
 
         json_data['content'] = 'abc'
         json_data['level'] = Message.DANGER_LEVEL
@@ -96,7 +112,7 @@ class MessageAPITest(TestCase):
                 side_effect=mocked_current_datetime)
     def test_post(self, mock_dt):
         json_data = {'message': {
-            'content': 'Hello World!', 'tags': ['seattle']}}
+            'content': 'Hello World!', 'tags': ['Seattle']}}
         response = self._post(json_data)
 
         self.assertEqual(response.status_code, 200)
@@ -106,7 +122,8 @@ class MessageAPITest(TestCase):
         self.assertEqual(data.get('message').get('begins'),
                          '2018-01-01T10:10:10+00:00')
         self.assertEqual(data.get('message').get('expires'), None)
-        self.assertEqual(data.get('message').get('tags'), ['seattle'])
+        self.assertEqual(data.get('message').get('tags'),
+                         [{'group': 'Cities', 'id': 3, 'name': 'Seattle'}])
 
     def test_delete(self):
         url = reverse('message_api', kwargs={'message_id': '4'})
@@ -186,10 +203,10 @@ class MessageAPIErrors(MessageAPITest):
         self.assertEqual(response.status_code, 400)
         self.assertIn(b"Missing: 'content'", response.content)
 
-        json_data = {'message': {'content': '', 'tags': ['olympia']}}
+        json_data = {'message': {'content': '', 'tags': ['Bothell']}}
         response = self._post(json_data)
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Invalid tag: olympia", response.content)
+        self.assertIn(b"Invalid tag: Bothell", response.content)
 
         json_data = {'message': {
             'content': '',

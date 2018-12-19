@@ -19,7 +19,7 @@ class TagGroup(models.Model):
         return {
             'id': self.pk,
             'name': self.name,
-            'tags': [t.name for t in self.tag_set.all()],
+            'tags': [t.to_json() for t in self.tag_set.all()],
         }
 
     def __str__(self):
@@ -58,18 +58,16 @@ class MessageManager(models.Manager):
 
 
 class Message(models.Model):
-    DEBUG_LEVEL = messages.DEBUG
     INFO_LEVEL = messages.INFO
     SUCCESS_LEVEL = messages.SUCCESS
     WARNING_LEVEL = messages.WARNING
     DANGER_LEVEL = messages.ERROR
 
     LEVEL_CHOICES = (
-        (DEBUG_LEVEL, 'debug'),
-        (INFO_LEVEL, 'info'),
-        (SUCCESS_LEVEL, 'success'),
-        (WARNING_LEVEL, 'warning'),
-        (DANGER_LEVEL, 'danger'),
+        (INFO_LEVEL, 'Info'),
+        (SUCCESS_LEVEL, 'Success'),
+        (WARNING_LEVEL, 'Warning'),
+        (DANGER_LEVEL, 'Danger'),
     )
 
     content = models.TextField(blank=True)
@@ -106,6 +104,7 @@ class Message(models.Model):
             'id': self.pk,
             'content': self.content,
             'level': self.level,
+            'level_name': self.get_level_display(),
             'begins': self.begins.isoformat() if (
                 self.begins is not None) else None,
             'expires': self.expires.isoformat() if (
@@ -115,7 +114,7 @@ class Message(models.Model):
             'modified': self.modified.isoformat() if (
                 self.modified is not None) else None,
             'modified_by': self.modified_by,
-            'tags': [t.name for t in self.tags.all()],
+            'tags': [tag.to_json() for tag in self.tags.all()],
             'is_active': self.is_active(),
         }
 

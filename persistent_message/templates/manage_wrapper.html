@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Persistent Message Manager</title>
+
+    {% load staticfiles %}
+
+    <!-- Bootstrap CDN -->
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+  </head>
+  <body>
+    {% block content %}{% endblock content %}
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="{% static "persistent_message/js/vendor/bootstrap-3.0.0.min.js" %}"></script>
+    <script src="{% static "persistent_message/js/vendor/handlebars-4.0.11.min.js" %}"></script>
+    <script src="{% static "persistent_message/js/vendor/moment-2.20.1.min.js" %}"></script>
+    {% block extra_js %}{% endblock extra_js %}
+  </body>
+</html>

@@ -6,7 +6,11 @@ from persistent_message.tests import mocked_current_datetime
 from unittest import mock
 
 
-class MessageTest(TestCase):
+class PersistentMessageTestCase(TestCase):
+    fixtures = ['test.json']
+
+
+class MessageTest(PersistentMessageTestCase):
     def setUp(self):
         self.message = Message()
         self.message.content = 'Hello World!'
@@ -25,15 +29,14 @@ class MessageTest(TestCase):
         self.assertEqual(self.message.modified_by, '')
 
         # Save it
-        self.message.modified_by = 'javerage'
+        self.message.modified_by = 'manager'
         self.message.save()
-        self.assertEqual(self.message.pk, 1)
         self.assertEqual(self.message.content, 'Hello World!')
         self.assertEqual(self.message.level, self.message.INFO_LEVEL)
         self.assertEqual(self.message.begins.isoformat(),
                          '2018-01-01T10:10:10+00:00')
         self.assertEqual(self.message.expires, None)
-        self.assertEqual(self.message.modified_by, 'javerage')
+        self.assertEqual(self.message.modified_by, 'manager')
         # These are 'auto_now' dates
         self.assertLess(self.message.created, timezone.now())
         self.assertLess(self.message.modified, timezone.now())
@@ -80,7 +83,7 @@ class MessageTest(TestCase):
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
     def test_json(self, mock_dt):
-        self.message.modified_by = 'javerage'
+        self.message.modified_by = 'manager'
         self.message.save()
 
         json_data = self.message.to_json()
@@ -88,24 +91,20 @@ class MessageTest(TestCase):
         self.assertEqual(json_data['level'], self.message.INFO_LEVEL)
         self.assertEqual(json_data['begins'], '2018-01-01T10:10:10+00:00')
         self.assertEqual(json_data['expires'], None)
-        self.assertEqual(json_data['modified_by'], 'javerage')
+        self.assertEqual(json_data['modified_by'], 'manager')
         self.assertEqual(json_data['tags'], [])
 
     def test_tags(self):
-        group = TagGroup(name='city')
-        group.save()
-
-        tag1 = Tag(name='seattle', group=group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group)
-        tag2.save()
+        tag1 = Tag.objects.get(name='Seattle')
+        tag2 = Tag.objects.get(name='Tacoma')
 
         self.message.save()
         self.message.tags.add(tag1, tag2)
 
         json_data = self.message.to_json()
-        self.assertEqual(json_data['tags'], ['seattle', 'tacoma'])
+        self.assertEqual(json_data['tags'], [
+            {'group': 'Cities', 'id': 3, 'name': 'Seattle'},
+            {'group': 'Cities', 'id': 4, 'name': 'Tacoma'}])
 
     def test_str(self):
         self.assertEqual(str(self.message), 'Hello World!')
@@ -145,55 +144,38 @@ class MessageTest(TestCase):
             '&lt;script&gt;alert("x");&lt;/script&gt;')
 
 
-class TagTest(TestCase):
-    def setUp(self):
-        group = TagGroup(name='city')
-        group.save()
-
-        self.tag = Tag(name='seattle', group=group)
-        self.tag.save()
-
+class TagTest(PersistentMessageTestCase):
     def test_json(self):
+        tag = Tag.objects.get(name='Seattle')
         self.assertEqual(
-            self.tag.to_json(),
-            {'id': 1, 'group': 'city', 'name': 'seattle'})
+            tag.to_json(),
+            {'id': 3, 'group': 'Cities', 'name': 'Seattle'})
 
     def test_str(self):
-        self.assertEqual(str(self.tag), 'seattle')
+        tag = Tag.objects.get(name='Seattle')
+        self.assertEqual(str(tag), 'Seattle')
 
 
-class TagGroupTest(TestCase):
-    def setUp(self):
-        self.group = TagGroup(name='city')
-        self.group.save()
-
-        tag1 = Tag(name='seattle', group=self.group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=self.group)
-        tag2.save()
-
+class TagGroupTest(PersistentMessageTestCase):
     def test_str(self):
-        self.assertEqual(str(self.group), 'city')
+        group = TagGroup.objects.get(name='Cities')
+        self.assertEqual(str(group), 'Cities')
 
     def test_json(self):
+        group = TagGroup.objects.get(name='States')
         self.assertEqual(
-            self.group.to_json(),
-            {'id': 1, 'name': 'city', 'tags': ['seattle', 'tacoma']})
+            group.to_json(),
+            {'id': 1, 'name': 'States', 'tags': [
+                {'group': 'States', 'id': 1, 'name': 'Washington'},
+                {'group': 'States', 'id': 2, 'name': 'Oregon'}]})
 
 
-class MessageManagerTest(TestCase):
+class MessageManagerTest(PersistentMessageTestCase):
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
     def setUp(self, mock_dt):
-        group = TagGroup(name='city')
-        group.save()
-
-        tag1 = Tag(name='seattle', group=group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group)
-        tag2.save()
+        tag1 = Tag.objects.get(name='Seattle')
+        tag2 = Tag.objects.get(name='Tacoma')
 
         message1 = Message(content='1')
         message1.save()
@@ -213,7 +195,8 @@ class MessageManagerTest(TestCase):
 
     def test_all_messages(self):
         results = Message.objects.all()
-        self.assertEqual([str(m) for m in results], ['1', '2', '3', '4'])
+        self.assertEqual([str(m) for m in results], [
+            'This is a test.', '1', '2', '3', '4'])
 
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
@@ -222,7 +205,7 @@ class MessageManagerTest(TestCase):
         self.assertEqual([str(m) for m in results], ['4', '1', '3'])
 
         results = Message.objects.active_messages(
-            tags=['seattle', 'tacoma'])
+            tags=['Seattle', 'Tacoma'])
         self.assertEqual([str(m) for m in results], ['4', '1'])
 
         results = Message.objects.active_messages(level=Message.WARNING_LEVEL)

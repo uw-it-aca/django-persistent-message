@@ -1,0 +1,86 @@
+[
+    {
+        "model": "persistent_message.taggroup",
+        "pk": 1,
+        "fields": {
+            "name": "States"
+        }
+    },
+	{
+        "model": "persistent_message.taggroup",
+        "pk": 2,
+        "fields": {
+            "name": "Cities"
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 1,
+        "fields": {
+            "name": "Washington",
+            "group": 1
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 2,
+        "fields": {
+            "name": "Oregon",
+            "group": 1
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 3,
+        "fields": {
+            "name": "Seattle",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 4,
+        "fields": {
+            "name": "Tacoma",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 5,
+        "fields": {
+            "name": "Olympia",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 6,
+        "fields": {
+            "name": "Spokane",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 7,
+        "fields": {
+            "name": "Portland",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.message",
+        "pk": 1,
+        "fields": {
+            "content": "This is a test.",
+            "level": 20,
+            "begins": "2017-01-01T10:10:10+00:00",
+            "expires": "2017-11-01T10:10:10+00:00",
+            "created": "2017-01-01T10:10:10+00:00",
+            "modified": "2017-01-01T10:10:10+00:00",
+            "modified_by": "manager",
+            "tags": [1, 3, 4]
+        }
+    }
+]
