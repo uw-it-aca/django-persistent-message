@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('content', models.TextField()),
-                ('level', models.IntegerField(choices=[(10, 'Debug'), (20, 'Information'), (25, 'Success'), (30, 'Warning'), (40, 'Danger')], default=20)),
+                ('level', models.IntegerField(choices=[(20, 'Info'), (25, 'Success'), (30, 'Warning'), (40, 'Danger')], default=20)),
                 ('begins', models.DateTimeField()),
                 ('expires', models.DateTimeField(null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),

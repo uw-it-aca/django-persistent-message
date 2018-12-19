@@ -31,14 +31,16 @@
             </div>
             <dl class="dl-horizontal">
                 <dt>Level</dt>
-                <dd>{{ level }}</dd>
-                <dt>Published</dt>
+                <dd><span class="btn btn-{{ lower level_name }}">{{ level_name }}</span></dd>
+                <dt>Active</dt>
                 <dd>{{ is_active }}</dd>
-                <dt>Published dates</dt>
-                <dd>{{ begins }} to {{ expires }}</dd>
-                {{# each groups}}
+                <dt>Begins</dt>
+                <dd>{{ format_date begins }}</dd>
+                <dt>Expires</dt>
+                <dd>{{ format_date expires }}</dd>
+                {{# each ../tag_groups}}
                 <dt>{{ name }}</dt>
-                <dd>{{# each tags}}{{ tag }} {{/each}}</dd>
+                <dd>{{# each ../tags}}{{# if_equals group ../name }}{{ name }} {{/if_equals}}{{/each}}</dd>
                 {{/each}}
             </dl>
         </div>
@@ -54,6 +56,20 @@
 {% verbatim %}
 <script id="message-form-tmpl" type="text/x-handlebars-template">
 <h3>Add Message</h3>
+<div class="row">
+    <div class="form-group col-xs-10">
+        <label for="pm-message-content">Message</label><br />
+        <textarea id="pm-message-content" class="form-control" rows="2" name="content" value="{{ message.content }}"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-xs-6">
+    <label>Level</label><br />
+    {{#each message_levels}}
+    <label for="pm-level-{{ name }}" class="radio-inline"><input type="radio" id="pm-level-{{ name }}" name="level" value="{{ level }}"><span class="btn btn-{{ lower name }}">{{ name }}</span></label>
+    {{/each}}
+    </div>
+</div>
 <div class="row">
 	<div class="form-group col-xs-6">
 		<label for="pm-message-begin-date">Begin date</label><br />
@@ -82,12 +98,6 @@
     {{/each}}
 </div>
 {{/each}}
-<div class="row">
-    <div class="form-group col-xs-10">
-    <label for="pm-message-content">Message</label><br />
-    <textarea id="pm-message-content" class="form-control" rows="2" name="content" value="{{ message.content }}"></textarea>
-    </div>
-</div>
 <button type="submit" class="btn btn-primary">Submit</button>
 </script>
 {% endverbatim %}
@@ -110,6 +120,7 @@
         csrftoken: '{{ csrf_token }}',
         message_api: '{{ message_api }}',
         tags_api: '{{ tags_api }}',
+        message_levels: [{% for level, name in message_levels %}{level: {{ level }}, name: '{{ name }}'},{% endfor %}]
     };
 </script>
 {% endblock extra_js %}

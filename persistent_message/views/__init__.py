@@ -1,4 +1,5 @@
 from persistent_message.decorators import message_admin_required
+from persistent_message.models import Message
 from django.urls import reverse
 from django.shortcuts import render
 from django import template
@@ -10,6 +11,7 @@ def manage(request):
         'session_id': request.session.session_key,
         'message_api': reverse('messages_api'),
         'tags_api': reverse('tag_groups_api'),
+        'message_levels': Message.LEVEL_CHOICES,
     }
 
     try:
