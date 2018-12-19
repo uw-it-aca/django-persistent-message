@@ -19,7 +19,7 @@ class TagGroup(models.Model):
         return {
             'id': self.pk,
             'name': self.name,
-            'tags': [t.name for t in self.tag_set.all()],
+            'tags': [t.to_json() for t in self.tag_set.all()],
         }
 
     def __str__(self):

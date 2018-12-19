@@ -10,25 +10,12 @@ import json
 
 
 class TagGroupAPITest(TestCase):
+    fixtures = ['test.json']
+
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.create_superuser(
             username='manager', email='manager@...', password='top_secret')
-
-        group1 = TagGroup(name='city')
-        group1.save()
-
-        group2 = TagGroup(name='state')
-        group2.save()
-
-        tag1 = Tag(name='seattle', group=group1)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group1)
-        tag2.save()
-
-        tag3 = Tag(name='washington', group=group2)
-        tag3.save()
 
     def test_get(self):
         request = self.factory.get(reverse('tag_groups_api'))
@@ -41,6 +28,8 @@ class TagGroupAPITest(TestCase):
 
 
 class MessageAPITest(TestCase):
+    fixtures = ['test.json']
+
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
     def setUp(self, mock_dt):
@@ -48,14 +37,8 @@ class MessageAPITest(TestCase):
         self.user = User.objects.create_superuser(
             username='manager', email='manager@...', password='top_secret')
 
-        group = TagGroup(name='city')
-        group.save()
-
-        tag1 = Tag(name='seattle', group=group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group)
-        tag2.save()
+        tag1 = Tag.objects.get(name='seattle')
+        tag2 = Tag.objects.get(name='tacoma')
 
         message1 = Message(content='1')
         message1.save()
@@ -217,10 +200,10 @@ class MessageAPIErrors(MessageAPITest):
         self.assertEqual(response.status_code, 400)
         self.assertIn(b"Missing: 'content'", response.content)
 
-        json_data = {'message': {'content': '', 'tags': ['olympia']}}
+        json_data = {'message': {'content': '', 'tags': ['bothell']}}
         response = self._post(json_data)
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Invalid tag: olympia", response.content)
+        self.assertIn(b"Invalid tag: bothell", response.content)
 
         json_data = {'message': {
             'content': '',

@@ -6,7 +6,11 @@ from persistent_message.tests import mocked_current_datetime
 from unittest import mock
 
 
-class MessageTest(TestCase):
+class PersistentMessageTestCase(TestCase):
+    fixtures = ['test.json']
+
+
+class MessageTest(PersistentMessageTestCase):
     def setUp(self):
         self.message = Message()
         self.message.content = 'Hello World!'
@@ -92,14 +96,8 @@ class MessageTest(TestCase):
         self.assertEqual(json_data['tags'], [])
 
     def test_tags(self):
-        group = TagGroup(name='city')
-        group.save()
-
-        tag1 = Tag(name='seattle', group=group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group)
-        tag2.save()
+        tag1 = Tag.objects.get(name='seattle')
+        tag2 = Tag.objects.get(name='tacoma')
 
         self.message.save()
         self.message.tags.add(tag1, tag2)
@@ -145,55 +143,38 @@ class MessageTest(TestCase):
             '&lt;script&gt;alert("x");&lt;/script&gt;')
 
 
-class TagTest(TestCase):
-    def setUp(self):
-        group = TagGroup(name='city')
-        group.save()
-
-        self.tag = Tag(name='seattle', group=group)
-        self.tag.save()
-
+class TagTest(PersistentMessageTestCase):
     def test_json(self):
+        tag = Tag.objects.get(name='seattle')
         self.assertEqual(
-            self.tag.to_json(),
-            {'id': 1, 'group': 'city', 'name': 'seattle'})
+            tag.to_json(),
+            {'id': 3, 'group': 'Cities', 'name': 'seattle'})
 
     def test_str(self):
-        self.assertEqual(str(self.tag), 'seattle')
+        tag = Tag.objects.get(name='seattle')
+        self.assertEqual(str(tag), 'seattle')
 
 
-class TagGroupTest(TestCase):
-    def setUp(self):
-        self.group = TagGroup(name='city')
-        self.group.save()
-
-        tag1 = Tag(name='seattle', group=self.group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=self.group)
-        tag2.save()
-
+class TagGroupTest(PersistentMessageTestCase):
     def test_str(self):
-        self.assertEqual(str(self.group), 'city')
+        group = TagGroup.objects.get(name='Cities')
+        self.assertEqual(str(group), 'Cities')
 
     def test_json(self):
+        group = TagGroup.objects.get(name='States')
         self.assertEqual(
-            self.group.to_json(),
-            {'id': 1, 'name': 'city', 'tags': ['seattle', 'tacoma']})
+            group.to_json(),
+            {'id': 1, 'name': 'States', 'tags': [
+                {'group': 'States', 'id': 1, 'name': 'washington'},
+                {'group': 'States', 'id': 2, 'name': 'oregon'}]})
 
 
-class MessageManagerTest(TestCase):
+class MessageManagerTest(PersistentMessageTestCase):
     @mock.patch('persistent_message.models.Message.current_datetime',
                 side_effect=mocked_current_datetime)
     def setUp(self, mock_dt):
-        group = TagGroup(name='city')
-        group.save()
-
-        tag1 = Tag(name='seattle', group=group)
-        tag1.save()
-
-        tag2 = Tag(name='tacoma', group=group)
-        tag2.save()
+        tag1 = Tag.objects.get(name='seattle')
+        tag2 = Tag.objects.get(name='tacoma')
 
         message1 = Message(content='1')
         message1.save()

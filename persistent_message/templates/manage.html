@@ -53,6 +53,7 @@
 
 {% verbatim %}
 <script id="message-form-tmpl" type="text/x-handlebars-template">
+<h3>Add Message</h3>
 <div class="row">
 	<div class="form-group col-xs-6">
 		<label for="pm-message-begin-date">Begin date</label><br />
@@ -74,14 +75,13 @@
 	</div>
 </div>
 {{# each tag_groups}}
-<h4>{{ name }}</h4>
+<label>{{ name }}</label>
 <div class="form-group">
     {{#each tags}}
     <label for="pm-tag-{{ name }}" class="checkbox-inline"><input type="checkbox" id="pm-tag-{{ name }}" name="{{ ../name }}" value="{{ name }}">{{ name }}</label>
     {{/each}}
 </div>
 {{/each}}
-<h3>Message</h3>
 <div class="row">
     <div class="form-group col-xs-10">
     <label for="pm-message-content">Message</label><br />

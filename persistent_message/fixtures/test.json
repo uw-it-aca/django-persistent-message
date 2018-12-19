@@ -1,0 +1,72 @@
+[
+    {
+        "model": "persistent_message.taggroup",
+        "pk": 1,
+        "fields": {
+            "name": "States"
+        }
+    },
+	{
+        "model": "persistent_message.taggroup",
+        "pk": 2,
+        "fields": {
+            "name": "Cities"
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 1,
+        "fields": {
+            "name": "washington",
+            "group": 1
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 2,
+        "fields": {
+            "name": "oregon",
+            "group": 1
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 3,
+        "fields": {
+            "name": "seattle",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 4,
+        "fields": {
+            "name": "tacoma",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 5,
+        "fields": {
+            "name": "olympia",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 6,
+        "fields": {
+            "name": "spokane",
+            "group": 2
+        }
+    },
+    {
+        "model": "persistent_message.tag",
+        "pk": 7,
+        "fields": {
+            "name": "portland",
+            "group": 2
+        }
+    }
+]

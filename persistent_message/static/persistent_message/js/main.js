@@ -33,16 +33,15 @@
             }
         });
 
-        var tag_cache;
-        function get_tags(callback) {
-            if (tag_cache === undefined) {
-                $.ajax({
-                    url: window.persistent_message.tags_api,
-                    dataType: 'json',
-                    async: false,
-                }).done(function (data) {tag_cache = data;});
-            }
-            return tag_cache;
+        function cache_tag_groups(data) {
+            window.persistent_message.tag_groups = data.tag_groups;
+        }
+
+        function init_tag_groups() {
+            $.ajax({
+                url: window.persistent_message.tags_api,
+                dataType: 'json',
+            }).fail().done(cache_tag_groups);
         }
 
         function get_message() {
@@ -116,8 +115,8 @@
         }
 
         function load_form(data) {
-            data.tag_groups = get_tags();
             var template = Handlebars.compile($('#message-form-tmpl').html());
+            data.tag_groups = window.persistent_message.tag_groups;
             $('#pm-content').html(template(data));
             //$('#pm-header').html(data.name);
             $('button.pm-btn-submit').click(add_message);
@@ -160,6 +159,7 @@
         function initialize() {
             $('#pm-message-add-link').click(init_add_message);
             $('#pm-messages-link').click(init_messages);
+            init_tag_groups();
             init_messages();
         }
 
