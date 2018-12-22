@@ -199,7 +199,7 @@ class MessageAPIErrors(MessageAPITest):
         json_data = {'message': {}}
         response = self._post(json_data)
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Missing: 'content'", response.content)
+        self.assertIn(b'Invalid JSON', response.content)
 
         json_data = {'message': {'content': '', 'tags': ['Bothell']}}
         response = self._post(json_data)

@@ -39,10 +39,11 @@ class MessageAPI(View):
             return self.error_response(400, 'Missing message ID')
 
         try:
-            tags = self._deserialize(request)
+            self._deserialize(request)
             self.message.save()
-            self.message.tags.clear()
-            self.message.tags.add(*tags)
+            if self.tags is not None:
+                self.message.tags.clear()
+                self.message.tags.add(*self.tags)
         except ValidationError as ex:
             return self.error_response(400, ex)
 
@@ -53,9 +54,10 @@ class MessageAPI(View):
         self.message = Message()
 
         try:
-            tags = self._deserialize(request)
+            self._deserialize(request)
             self.message.save()
-            self.message.tags.add(*tags)
+            if self.tags is not None:
+                self.message.tags.add(*self.tags)
         except ValidationError as ex:
             return self.error_response(400, ex)
 
@@ -89,32 +91,36 @@ class MessageAPI(View):
                             content_type='application/json')
 
     def _deserialize(self, request):
+        self.tags = None
         try:
             json_data = json.loads(request.body)['message']
+            if not any(key in json_data for key in [
+                    'content', 'level', 'begins', 'expires', 'tags']):
+                raise ValidationError()
         except Exception as ex:
             raise ValidationError('Invalid JSON: {}'.format(request.body))
 
-        try:
+        if 'content' in json_data:
             self.message.content = json_data['content']
-            self.message.level = json_data.get('level', Message.INFO_LEVEL)
-            begins = json_data.get('begins')
+        if 'level' in json_data:
+            self.message.level = json_data['level']
+        if 'begins' in json_data:
+            begins = json_data['begins']
             self.message.begins = dateutil.parser.parse(begins) if (
                 begins is not None) else None
-            expires = json_data.get('expires')
+        if 'expires' in json_data:
+            expires = json_data['expires']
             self.message.expires = dateutil.parser.parse(expires) if (
                 expires is not None) else None
-            self.message.modified_by = request.user.username
-        except KeyError as ex:
-            raise ValidationError('Missing: {}'.format(ex))
+        if 'tags' in json_data:
+            self.tags = []
+            for name in json_data['tags']:
+                try:
+                    self.tags.append(Tag.objects.get(name=name))
+                except Tag.DoesNotExist:
+                    raise ValidationError('Invalid tag: {}'.format(name))
 
-        tags = []
-        for name in json_data.get('tags', []):
-            try:
-                tags.append(Tag.objects.get(name=name))
-            except Tag.DoesNotExist:
-                raise ValidationError('Invalid tag: {}'.format(name))
-
-        return tags
+        self.message.modified_by = request.user.username
 
 
 @method_decorator(message_admin_required, name='dispatch')
