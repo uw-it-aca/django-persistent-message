@@ -79,14 +79,14 @@
             });
         }
 
-        function delete_error(xhr) {
+        function ajax_error(xhr) {
             var data;
             try {
                 data = $.parseJSON(xhr.responseText);
             } catch (e) {
                 data = {error: xhr.responseText};
             }
-            alert('Delete failed: ' + data.error);
+            alert(xhr.method + ' failed: ' + data.error);
         }
 
         function delete_message() {
@@ -99,8 +99,23 @@
                         url: window.persistent_message.message_api + '/' + message_id,
                         dataType: 'json',
                         type: 'DELETE'
-                    }).fail(delete_error).done(init_messages);
+                    }).fail(ajax_error).done(init_messages);
                 }
+            }
+        }
+
+        function publish_message() {
+            /*jshint validthis: true */
+            var message_id = $(this).attr('id').replace('pm-publish-', '');
+           
+            if (message_id.match(/^[0-9]+$/)) {
+                $.ajax({
+                    url: window.persistent_message.message_api + '/' + message_id,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'PATCH',
+                    data: data
+                }).fail(ajax_error).done(init_messages);
             }
         }
 
@@ -170,7 +185,9 @@
 
         function load_form(data) {
             var template = Handlebars.compile($('#message-form-tmpl').html()),
-                now = moment();
+                now = moment(),
+                begins = (data.message.begins) ? moment(data.message.begins) : now,
+                expires = (data.message.expires) ? moment(data.message.expires) : null;
             data.tag_groups = window.persistent_message.tag_groups;
             data.message_levels = window.persistent_message.message_levels;
             $('#pm-content').html(template(data));
@@ -178,18 +195,24 @@
             $('#pm-begins-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
-                minDate: (data.message.begins) ? moment(data.message.begins) : now,
-                defaultDate: (data.message.begins) ? moment(data.message.begins) : now
+                minDate: (begins.isBefore(now)) ? begins : now,
+                defaultDate: begins
             }).on('dp.change', function (e) {
-                $('#pm-expires-datetimepicker').data('DateTimePicker').minDate(e.date);
+                var expires_dtp = $('#pm-expires-datetimepicker').data('DateTimePicker'),
+                    expires = expires_dtp.date();
+                expires_dtp.minDate(e.date);
+                if (expires === null) {
+                    expires_dtp.date(expires);
+                }
             });
             $('#pm-expires-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
-                minDate: (data.message.begins) ? moment(data.message.begins) : now,
-                defaultDate: (data.message.expires) ? moment(data.message.expires) : false
+                minDate: (expires === null) ? begins : false,
+                defaultDate: (expires !== null) ? expires : false
             });
             $('button.pm-btn-submit').click((data.message.id) ? update_message : add_message);
+            $('button.pm-btn-cancel').click(init_messages);
             $('#pm-message-content').focus();
         }
 
@@ -198,6 +221,8 @@
             data.tag_groups = window.persistent_message.tag_groups;
             $('#pm-content').html(template(data));
             $('button.pm-btn-edit').click(init_edit_message);
+            $('button.pm-btn-publish').click(publish_message);
+            $('button.pm-btn-unpublish').click(unpublish_message);
             $('button.pm-btn-delete').click(delete_message);
         }
 

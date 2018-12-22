@@ -23,6 +23,7 @@
             <em>Updated by {{ modified_by }} on {{ format_date modified }}</em>
             <div class="text-right">
                 <button id="pm-edit-{{ id }}" class="btn btn-primary pm-btn-edit" name="action">Edit</button>
+                <button id="pm-publish-{{ id }}" class="btn {{# if is_active }}btn-warning pm-btn-unpublish{{else}}btn-success pm-btn-publish{{/if}}" name="action">{{# if is_active }}Unpublish{{else}}Publish{{/if}}</button>
                 <button id="pm-delete-{{ id }}" class="btn btn-danger pm-btn-delete" name="action">Delete</button>
             </div>
             <dl class="dl-horizontal">
@@ -95,6 +96,7 @@
 {{/each}}
 <input type="hidden" id="pm-message-id" name="message_id" value="{{ message.id }}"/>
 <button type="submit" class="btn btn-primary pm-btn-submit">Submit</button>
+<button type="submit" class="btn btn-danger pm-btn-cancel">Cancel</button>
 </script>
 {% endverbatim %}
 
