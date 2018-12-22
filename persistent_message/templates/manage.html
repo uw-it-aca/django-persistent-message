@@ -28,7 +28,7 @@
             </div>
             <dl class="dl-horizontal">
                 <dt>Level</dt>
-                <dd><span class="btn btn-{{ lower level_name }}">{{ level_name }}</span></dd>
+                <dd>{{ level_name }}</dd>
                 <dt>Active</dt>
                 <dd>{{# if is_active }}Yes{{else}}No{{/if}}</dd>
                 <dt>Begins</dt>
@@ -60,7 +60,7 @@
 </div>
 <div class="row">
     <div class="form-group col-xs-6">
-    <label>Level</label><br />
+    <label>Message level</label><br />
     {{#each message_levels}}
     <label for="pm-level-{{ lower name }}" class="radio-inline"><input type="radio" id="pm-level-{{ lower name }}" name="level" value="{{ level }}"{{# if_equals level ../message.level }} checked="checked"{{/if_equals}}/><span class="btn btn-{{ lower name }}">{{ name }}</span></label>
     {{/each}}
