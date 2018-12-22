@@ -19,15 +19,16 @@
 {{# each messages}}
     <li class="list-group-item">
         <div>
-            <div style="padding: 10px 15px;font-size: 15px;text-align: center;border:1px solid #333;background-color:#fff;margin:10px 0;">{{{ content }}}</div>
+            <div class="alert alert-{{ lower level_name }}" style="padding: 10px 15px; border: 1px solid #333; margin: 10px 0; color: #000">{{{ content }}}</div>
             <em>Updated by {{ modified_by }} on {{ format_date modified }}</em>
             <div class="text-right">
                 <button id="pm-edit-{{ id }}" class="btn btn-primary pm-btn-edit" name="action">Edit</button>
+                <button id="pm-publish-{{ id }}" class="btn {{# if is_active }}btn-warning pm-btn-unpublish{{else}}btn-success pm-btn-publish{{/if}}" name="action">{{# if is_active }}Unpublish{{else}}Publish{{/if}}</button>
                 <button id="pm-delete-{{ id }}" class="btn btn-danger pm-btn-delete" name="action">Delete</button>
             </div>
             <dl class="dl-horizontal">
                 <dt>Level</dt>
-                <dd><span class="btn btn-{{ lower level_name }}">{{ level_name }}</span></dd>
+                <dd>{{ level_name }}</dd>
                 <dt>Active</dt>
                 <dd>{{# if is_active }}Yes{{else}}No{{/if}}</dd>
                 <dt>Begins</dt>
@@ -59,33 +60,31 @@
 </div>
 <div class="row">
     <div class="form-group col-xs-6">
-    <label>Level</label><br />
+    <label>Message level</label><br />
     {{#each message_levels}}
     <label for="pm-level-{{ lower name }}" class="radio-inline"><input type="radio" id="pm-level-{{ lower name }}" name="level" value="{{ level }}"{{# if_equals level ../message.level }} checked="checked"{{/if_equals}}/><span class="btn btn-{{ lower name }}">{{ name }}</span></label>
     {{/each}}
     </div>
 </div>
 <div class="row">
-	<div class="form-group col-xs-6">
-		<label for="pm-message-begins">Message begins</label>
+    <div class="form-group col-md-5">
+        <label for="pm-message-begins">Message begins</label>
         <div class="input-group date" id="pm-begins-datetimepicker">
-		    <input id="pm-message-begins" name="begins" type="text" class="form-control" value=""/>
+            <input id="pm-message-begins" name="begins" type="text" class="form-control" value=""/>
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
             </span>
         </div>
-	</div>
-</div>
-<div class="row">
-    <div class="form-group col-xs-6">
-		<label for="pm-message-expires">Message expires</label>
+    </div>
+    <div class="form-group col-md-5">
+	<label for="pm-message-expires">Message expires</label>
         <div class="input-group date" id="pm-expires-datetimepicker">
-		    <input id="pm-message-expires" name="expires" type="text" class="form-control" value=""/>
+            <input id="pm-message-expires" name="expires" type="text" class="form-control" value=""/>
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
             </span>
         </div>
-	</div>
+    </div>
 </div>
 {{# each tag_groups}}
 <label>{{ name }}</label>
@@ -97,6 +96,7 @@
 {{/each}}
 <input type="hidden" id="pm-message-id" name="message_id" value="{{ message.id }}"/>
 <button type="submit" class="btn btn-primary pm-btn-submit">Submit</button>
+<button type="submit" class="btn btn-danger pm-btn-cancel">Cancel</button>
 </script>
 {% endverbatim %}
 

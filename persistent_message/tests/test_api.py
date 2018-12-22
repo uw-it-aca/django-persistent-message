@@ -14,8 +14,7 @@ class TagGroupAPITest(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
-        self.user = User.objects.create_superuser(
-            username='manager', email='manager@...', password='top_secret')
+        self.user = User.objects.get(username='manager')
 
     def test_get(self):
         request = self.factory.get(reverse('tag_groups_api'))
@@ -34,8 +33,7 @@ class MessageAPITest(TestCase):
                 side_effect=mocked_current_datetime)
     def setUp(self, mock_dt):
         self.factory = RequestFactory()
-        self.user = User.objects.create_superuser(
-            username='manager', email='manager@...', password='top_secret')
+        self.user = User.objects.get(username='manager')
 
         tag1 = Tag.objects.get(name='Seattle')
         tag2 = Tag.objects.get(name='Tacoma')
@@ -201,7 +199,7 @@ class MessageAPIErrors(MessageAPITest):
         json_data = {'message': {}}
         response = self._post(json_data)
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b"Missing: 'content'", response.content)
+        self.assertIn(b'Invalid JSON', response.content)
 
         json_data = {'message': {'content': '', 'tags': ['Bothell']}}
         response = self._post(json_data)

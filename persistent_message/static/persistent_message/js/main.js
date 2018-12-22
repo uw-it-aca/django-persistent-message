@@ -79,14 +79,14 @@
             });
         }
 
-        function delete_error(xhr) {
+        function ajax_error(xhr) {
             var data;
             try {
                 data = $.parseJSON(xhr.responseText);
             } catch (e) {
                 data = {error: xhr.responseText};
             }
-            alert('Delete failed: ' + data.error);
+            alert(xhr.method + ' failed: ' + data.error);
         }
 
         function delete_message() {
@@ -99,9 +99,34 @@
                         url: window.persistent_message.message_api + '/' + message_id,
                         dataType: 'json',
                         type: 'DELETE'
-                    }).fail(delete_error).done(init_messages);
+                    }).fail(ajax_error).done(init_messages);
                 }
             }
+        }
+
+        function toggle_publish_message() {
+            /*jshint validthis: true */
+            var message_id = $(this).attr('id').replace('pm-publish-', ''),
+                message = window.persistent_message.messages[message_id],
+                now = moment().subtract(5, 'seconds'),
+                data = {};
+
+            if ($(this).hasClass('pm-btn-publish')) {
+                data.begins = now.utc().toISOString();
+                if (message.expires !== null && moment(message.expires).isBefore(now)) {
+                    data.expires = null;
+                }
+            } else {
+                data.expires = now.utc().toISOString();
+            }
+
+            $.ajax({
+                url: window.persistent_message.message_api + '/' + message_id,
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'PUT',
+                data: JSON.stringify({'message': data})
+            }).fail(ajax_error).done(init_messages);
         }
 
         function _serialize_form() {
@@ -169,7 +194,10 @@
         }
 
         function load_form(data) {
-            var template = Handlebars.compile($('#message-form-tmpl').html());
+            var template = Handlebars.compile($('#message-form-tmpl').html()),
+                now = moment(),
+                begins = (data.message.begins) ? moment(data.message.begins) : now,
+                expires = (data.message.expires) ? moment(data.message.expires) : null;
             data.tag_groups = window.persistent_message.tag_groups;
             data.message_levels = window.persistent_message.message_levels;
             $('#pm-content').html(template(data));
@@ -177,23 +205,40 @@
             $('#pm-begins-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
-                defaultDate: (data.message.begins) ? moment(data.message.begins) : false
+                minDate: (begins.isBefore(now)) ? begins : now,
+                defaultDate: begins
+            }).on('dp.change', function (e) {
+                var expires_dtp = $('#pm-expires-datetimepicker').data('DateTimePicker'),
+                    expires = expires_dtp.date();
+                expires_dtp.minDate(e.date);
+                if (expires === null) {
+                    expires_dtp.date(expires);
+                }
             });
             $('#pm-expires-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
-                defaultDate: (data.message.expires) ? moment(data.message.expires) : false
+                minDate: (expires === null) ? begins : false,
+                defaultDate: (expires !== null) ? expires : false
             });
             $('button.pm-btn-submit').click((data.message.id) ? update_message : add_message);
+            $('button.pm-btn-cancel').click(init_messages);
             $('#pm-message-content').focus();
         }
 
         function load_messages(data) {
-            var template = Handlebars.compile($('#message-list-tmpl').html());
+            var template = Handlebars.compile($('#message-list-tmpl').html()),
+                i;
             data.tag_groups = window.persistent_message.tag_groups;
             $('#pm-content').html(template(data));
             $('button.pm-btn-edit').click(init_edit_message);
+            $('button.pm-btn-publish, button.pm-btn-unpublish').click(toggle_publish_message);
             $('button.pm-btn-delete').click(delete_message);
+
+            window.persistent_message.messages = {};
+            for (i = 0; i < data.messages.length; i++)  {
+                window.persistent_message.messages[data.messages[i].id] = data.messages[i];
+            }
         }
 
         function load_error(xhr) {
