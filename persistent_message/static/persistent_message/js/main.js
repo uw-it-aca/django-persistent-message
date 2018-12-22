@@ -177,12 +177,18 @@
             $('#pm-begins-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
+                useCurrent: false,
                 defaultDate: (data.message.begins) ? moment(data.message.begins) : false
+            }).on('dp.change', function (e) {
+                $('#pm-expires-datetimepicker').data('DateTimePicker').minDate(e.date);
             });
             $('#pm-expires-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
+                useCurrent: false,
                 defaultDate: (data.message.expires) ? moment(data.message.expires) : false
+            }).on('dp.change', function (e) {
+                $('#pm-begins-datetimepicker').data('DateTimePicker').maxDate(e.date);
             });
             $('button.pm-btn-submit').click((data.message.id) ? update_message : add_message);
             $('#pm-message-content').focus();
