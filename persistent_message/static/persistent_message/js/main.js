@@ -169,7 +169,8 @@
         }
 
         function load_form(data) {
-            var template = Handlebars.compile($('#message-form-tmpl').html());
+            var template = Handlebars.compile($('#message-form-tmpl').html()),
+                now = moment();
             data.tag_groups = window.persistent_message.tag_groups;
             data.message_levels = window.persistent_message.message_levels;
             $('#pm-content').html(template(data));
@@ -177,18 +178,16 @@
             $('#pm-begins-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
-                useCurrent: false,
-                defaultDate: (data.message.begins) ? moment(data.message.begins) : false
+                minDate: (data.message.begins) ? moment(data.message.begins) : now,
+                defaultDate: (data.message.begins) ? moment(data.message.begins) : now
             }).on('dp.change', function (e) {
                 $('#pm-expires-datetimepicker').data('DateTimePicker').minDate(e.date);
             });
             $('#pm-expires-datetimepicker').datetimepicker({
                 locale: 'en',
                 format: 'L LT',
-                useCurrent: false,
+                minDate: (data.message.begins) ? moment(data.message.begins) : now,
                 defaultDate: (data.message.expires) ? moment(data.message.expires) : false
-            }).on('dp.change', function (e) {
-                $('#pm-begins-datetimepicker').data('DateTimePicker').maxDate(e.date);
             });
             $('button.pm-btn-submit').click((data.message.id) ? update_message : add_message);
             $('#pm-message-content').focus();
