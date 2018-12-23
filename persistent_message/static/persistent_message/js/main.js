@@ -12,7 +12,7 @@
     function format_date(date_str) {
         var dt = moment(date_str);
         if (dt.isValid()) {
-            return dt.format('MMMM D[,] YYYY [at] h:mm A');
+            return dt.format('MMM[.] D[,] YYYY[,] h:mm A');
         }
         return '';
     }
@@ -91,10 +91,11 @@
 
         function delete_message() {
             /*jshint validthis: true */
-            var message_id = $(this).attr('id').replace('pm-delete-', '');
+            var message_id = $(this).attr('id').replace('pm-delete-', ''),
+                confirmation = 'Delete this message?';
 
             if (message_id.match(/^[0-9]+$/)) {
-                if (confirm('Delete this message?')) {
+                if (confirm(confirmation)) {
                     $.ajax({
                         url: window.persistent_message.message_api + '/' + message_id,
                         dataType: 'json',
@@ -109,24 +110,30 @@
             var message_id = $(this).attr('id').replace('pm-publish-', ''),
                 message = window.persistent_message.messages[message_id],
                 now = moment().subtract(5, 'seconds'),
+                confirmation,
                 data = {};
 
             if ($(this).hasClass('pm-btn-publish')) {
                 data.begins = now.utc().toISOString();
+                confirmation = 'Publish this message?';
                 if (message.expires !== null && moment(message.expires).isBefore(now)) {
                     data.expires = null;
+                    confirmation += ' Expiration will be set to "Never".';
                 }
             } else {
                 data.expires = now.utc().toISOString();
+                confirmation = 'Unpublish this message?';
             }
 
-            $.ajax({
-                url: window.persistent_message.message_api + '/' + message_id,
-                dataType: 'json',
-                contentType: 'application/json',
-                type: 'PUT',
-                data: JSON.stringify({'message': data})
-            }).fail(ajax_error).done(init_messages);
+            if (confirm(confirmation)) {
+                $.ajax({
+                    url: window.persistent_message.message_api + '/' + message_id,
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'PUT',
+                    data: JSON.stringify({'message': data})
+                }).fail(ajax_error).done(init_messages);
+            }
         }
 
         function _serialize_form() {

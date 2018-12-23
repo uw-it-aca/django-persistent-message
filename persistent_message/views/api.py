@@ -24,7 +24,8 @@ class MessageAPI(View):
                     404, 'Message {} not found'.format(message_id))
         except KeyError:
             messages = []
-            for message in Message.objects.all().order_by('-modified'):
+            for message in sorted(Message.objects.all(), key=lambda m: (
+                    m.is_active(), m.modified), reverse=True):
                 messages.append(message.to_json())
             return self.json_response({'messages': messages})
 

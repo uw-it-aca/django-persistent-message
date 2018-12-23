@@ -18,29 +18,31 @@
 <ul class="list-group">
 {{# each messages}}
     <li class="list-group-item">
-        <div>
-            <div class="alert alert-{{ lower level_name }}" style="padding: 10px 15px; border: 1px solid #333; margin: 10px 0; color: #000">{{{ content }}}</div>
-            <em>Updated by {{ modified_by }} on {{ format_date modified }}</em>
-            <div class="text-right">
+        <div class="alert alert-{{ lower level_name }}" style="padding: 10px 15px; border: 1px solid #333; margin: 10px 0; color: #000">{{{ content }}}</div>
+        <div class="row">
+            <div class="col-md-6">
+                <em>Updated by {{ modified_by }} on {{ format_date modified }}</em>
+            </div>
+            <div class="col-md-6 text-right">
                 <button id="pm-edit-{{ id }}" class="btn btn-primary pm-btn-edit" name="action">Edit</button>
-                <button id="pm-publish-{{ id }}" class="btn {{# if is_active }}btn-warning pm-btn-unpublish{{else}}btn-success pm-btn-publish{{/if}}" name="action">{{# if is_active }}Unpublish{{else}}Publish{{/if}}</button>
+                <button id="pm-publish-{{ id }}" class="btn btn-primary {{# if is_active }}pm-btn-unpublish{{else}}pm-btn-publish{{/if}}" name="action">{{# if is_active }}Unpublish{{else}}Publish{{/if}}</button>
                 <button id="pm-delete-{{ id }}" class="btn btn-danger pm-btn-delete" name="action">Delete</button>
             </div>
-            <dl class="dl-horizontal">
-                <dt>Level</dt>
-                <dd>{{ level_name }}</dd>
-                <dt>Active</dt>
-                <dd>{{# if is_active }}Yes{{else}}No{{/if}}</dd>
-                <dt>Begins</dt>
-                <dd>{{ format_date begins }}</dd>
-                <dt>Expires</dt>
-                <dd>{{ format_date expires }}</dd>
-                {{# each ../tag_groups}}
-                <dt>{{ name }}</dt>
-                <dd>{{# each ../tags}}{{# if_equals group ../name }}{{ name }} {{/if_equals}}{{/each}}</dd>
-                {{/each}}
-            </dl>
         </div>
+        <dl class="dl-horizontal">
+            <dt>Level</dt>
+            <dd>{{ level_name }}</dd>
+            <dt>Published</dt>
+            <dd>{{# if is_active }}Yes{{else}}No{{/if}}</dd>
+            <dt>Begins</dt>
+            <dd>{{ format_date begins }}</dd>
+            <dt>Expires</dt>
+            <dd>{{# if expires }}{{ format_date expires }}{{else}}{{# if begins }}Never{{/if}}{{/if}}</dd>
+            {{# each ../tag_groups}}
+            <dt>{{ name }}</dt>
+            <dd>{{# each ../tags}}{{# if_equals group ../name }}{{ name }} {{/if_equals}}{{/each}}</dd>
+            {{/each}}
+        </dl>
     </li>
 {{/each}}
 </ul>
