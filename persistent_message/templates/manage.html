@@ -54,18 +54,11 @@
 
 {% verbatim %}
 <script id="message-form-tmpl" type="text/x-handlebars-template">
+<input type="hidden" id="pm-message-id" name="message_id" value="{{ message.id }}"/>
 <div class="row">
     <div class="form-group col-xs-10">
-        <label for="pm-message-content">Message</label><br />
+        <label for="pm-message-content"><h3>Message</h3></label>
         <textarea id="pm-message-content" class="form-control" rows="2" name="content">{{ message.content }}</textarea>
-    </div>
-</div>
-<div class="row">
-    <div class="form-group col-xs-6">
-    <label>Message level</label><br />
-    {{#each message_levels}}
-    <label for="pm-level-{{ lower name }}" class="radio-inline"><input type="radio" id="pm-level-{{ lower name }}" name="level" value="{{ level }}"{{# if_equals level ../message.level }} checked="checked"{{/if_equals}}/><span class="btn btn-{{ lower name }}">{{ name }}</span></label>
-    {{/each}}
     </div>
 </div>
 <div class="row">
@@ -88,6 +81,15 @@
         </div>
     </div>
 </div>
+<h3>Filtering options</h3>
+<div class="row">
+    <div class="form-group col-xs-6">
+        <label>Message level</label><br />
+        {{#each message_levels}}
+        <label for="pm-level-{{ lower name }}" class="radio-inline"><input type="radio" id="pm-level-{{ lower name }}" name="level" value="{{ level }}"{{# if_equals level ../message.level }} checked="checked"{{/if_equals}}/><span class="btn btn-{{ lower name }}">{{ name }}</span></label>
+        {{/each}}
+    </div>
+</div>
 {{# each tag_groups}}
 <label>{{ name }}</label>
 <div class="form-group">
@@ -96,9 +98,12 @@
     {{/each}}
 </div>
 {{/each}}
-<input type="hidden" id="pm-message-id" name="message_id" value="{{ message.id }}"/>
-<button type="submit" class="btn btn-primary pm-btn-submit">Submit</button>
-<button type="submit" class="btn btn-danger pm-btn-cancel">Cancel</button>
+<div>
+<br/>
+<div class="form-group">
+    <button type="submit" class="btn btn-primary pm-btn-submit">Submit</button>
+    <button type="submit" class="btn btn-danger pm-btn-cancel">Cancel</button>
+</div>
 </script>
 {% endverbatim %}
 

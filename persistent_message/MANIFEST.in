@@ -1,0 +1,2 @@
+include persistent_message/VERSION
+recursive-include persistent_message *
