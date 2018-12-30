@@ -25,8 +25,13 @@ Messages can be set to one of four levels: Info, Success, Warning, Danger.
 ### Message Tags
 
 Tags provide another way to filter the display of messages to specific
-users or conditions.  Tags should be added by way of a fixture file in your
+users or conditions.  Tags should be created by way of a fixture file in your
 application.  See `persistent_message/fixtures/test.json` for an example.
+
+### Message Rendering
+
+Message.render will render the message as a Django template and return the
+rendered string, using a passed context dictionary.
 
 ### Message Admin Authorization
 
