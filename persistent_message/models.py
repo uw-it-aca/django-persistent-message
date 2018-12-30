@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.template import Template, Context
 from django.utils import timezone
 import bleach
 
@@ -117,6 +118,9 @@ class Message(models.Model):
             'tags': [tag.to_json() for tag in self.tags.all()],
             'is_active': self.is_active(),
         }
+
+    def render(self, context={}):
+        return Template(self.content).render(Context(context))
 
     @staticmethod
     def current_datetime():
