@@ -109,6 +109,13 @@ class MessageTest(PersistentMessageTestCase):
     def test_str(self):
         self.assertEqual(str(self.message), 'Hello World!')
 
+    def test_render(self):
+        self.message.content = 'Test {{ foo }} and {{ bar }}.'
+        self.assertEqual(self.message.render(), 'Test  and .')
+
+        context = {'foo': 'this', 'bar': 'that'}
+        self.assertEqual(self.message.render(context), 'Test this and that.')
+
     def test_sanitize_content(self):
         self.assertRaises(TypeError, self.message.sanitize_content, None)
         self.assertRaises(TypeError, self.message.sanitize_content, 1.75)
