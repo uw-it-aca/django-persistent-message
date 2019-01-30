@@ -150,6 +150,14 @@ class MessageTest(PersistentMessageTestCase):
             self.message.sanitize_content('<script>alert("x");</script>'),
             '&lt;script&gt;alert("x");&lt;/script&gt;')
 
+        self.assertEqual(
+            self.message.sanitize_content('<p>Hello World!</p>'),
+            '<p>Hello World!</p>')
+
+        self.assertEqual(
+            self.message.sanitize_content('Hello<br/>World!'),
+            'Hello<br>World!')
+
 
 class TagTest(PersistentMessageTestCase):
     def test_json(self):
