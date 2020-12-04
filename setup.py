@@ -25,7 +25,7 @@ setup(
     install_requires=[
         'Django>=2.1,<3.0',
         'python-dateutil',
-        'bleach',
+        'bleach>=3.2.0',
     ],
     license='Apache License, Version 2.0',
     description=('Django-Persistent-Message'),
