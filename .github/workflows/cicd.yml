@@ -77,7 +77,7 @@ jobs:
           test -f ${CONF_PATH}/settings.py && cat ${CONF_PATH}/settings.py >> project/settings.py
 
       - name: Run Pycodestyle
-        run: pycodestyle ${APP_NAME}/
+        run: pycodestyle ${APP_NAME}/ --exclude=migrations
 
       - name: Run Migrations
         run: python manage.py migrate
