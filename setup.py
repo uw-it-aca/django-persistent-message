@@ -6,7 +6,6 @@ See the README on `GitHub
 <https://github.com/uw-it-aca/django-persistent-message>`_.
 """
 
-# The VERSION file is created by travis-ci, based on the tag name
 version_path = 'persistent_message/VERSION'
 VERSION = open(os.path.join(os.path.dirname(__file__), version_path)).read()
 VERSION = VERSION.replace("\n", "")
@@ -23,7 +22,7 @@ setup(
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'Django>=2.1,<3.0',
+        'Django>=2.1,<3.2',
         'python-dateutil',
         'bleach>=3.2.0',
     ],
