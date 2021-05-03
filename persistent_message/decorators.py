@@ -1,3 +1,6 @@
+# Copyright 2021 UW-IT, University of Washington
+# SPDX-License-Identifier: Apache-2.0
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils.module_loading import import_string
