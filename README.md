@@ -1,7 +1,7 @@
 # django-persistent-message
 
-[![Build Status](https://github.com/uw-it-aca/django-persistent-message/workflows/tests/badge.svg?branch=master)](https://github.com/uw-it-aca/django-persistent-message/actions)
-[![Coverage Status](https://coveralls.io/repos/github/uw-it-aca/django-persistent-message/badge.svg?branch=master)](https://coveralls.io/github/uw-it-aca/django-persistent-message?branch=master)
+[![Build Status](https://github.com/uw-it-aca/django-persistent-message/workflows/tests/badge.svg?branch=main)](https://github.com/uw-it-aca/django-persistent-message/actions)
+[![Coverage Status](https://coveralls.io/repos/github/uw-it-aca/django-persistent-message/badge.svg?branch=main)](https://coveralls.io/github/uw-it-aca/django-persistent-message?branch=main)
 [![PyPi Version](https://img.shields.io/pypi/v/django-persistent-message.svg)](https://pypi.python.org/pypi/django-persistent-message)
 ![Python versions](https://img.shields.io/pypi/pyversions/django-persistent-message.svg)
 
