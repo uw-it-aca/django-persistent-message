@@ -76,8 +76,11 @@ jobs:
           test -f ${CONF_PATH}/urls.py && cp ${CONF_PATH}/urls.py project/
           test -f ${CONF_PATH}/settings.py && cat ${CONF_PATH}/settings.py >> project/settings.py
 
-      - name: Run Pycodestyle
-        run: pycodestyle ${APP_NAME}/ --exclude=migrations
+      - name: Run Python Linters
+        uses: uw-it-aca/actions/python-linters@main
+        with:
+          app_name: ${APP_NAME}
+          exclude_paths: 'migrations'
 
       - name: Run Migrations
         run: python manage.py migrate
