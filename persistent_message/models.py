@@ -73,7 +73,7 @@ class Message(models.Model):
         (WARNING_LEVEL, 'Warning'),
         (DANGER_LEVEL, 'Danger'),
     )
-
+    title = models.TextField(blank=True)
     content = models.TextField(blank=True)
     level = models.IntegerField(choices=LEVEL_CHOICES, default=INFO_LEVEL)
     begins = models.DateTimeField()
@@ -82,6 +82,10 @@ class Message(models.Model):
     modified = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=50)
     tags = models.ManyToManyField(Tag)
+
+    is_published = models.BooleanField(default=False)
+    group_id = models.CharField(max_length=200, null=True)
+    preview_id = models.SlugField(null=True, db_index=True, unique=True)
 
     objects = MessageManager()
 
