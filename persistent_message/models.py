@@ -93,9 +93,6 @@ class Message(models.Model):
         return (self.begins is not None and self.begins <= now and (
             self.expires is None or now <= self.expires))
 
-    def has_target_group(self):
-        return self.target_group_id is not None and len(self.target_group_id)
-
     def clean(self):
         self.content = self.sanitize_content(self.content)
 
