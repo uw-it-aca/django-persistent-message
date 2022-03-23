@@ -19,6 +19,7 @@ MESSAGE_ALLOWED_STYLES = ['font-size', 'color']
 def current_datetime():
     return timezone.now()
 
+
 class TagGroup(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
