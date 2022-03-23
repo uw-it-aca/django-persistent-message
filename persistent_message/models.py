@@ -16,6 +16,9 @@ MESSAGE_ALLOWED_ATTRIBUTES['*'] = ['class', 'style', 'aria-hidden']
 MESSAGE_ALLOWED_STYLES = ['font-size', 'color']
 
 
+def current_datetime():
+    return timezone.now()
+
 class TagGroup(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -47,7 +50,7 @@ class Tag(models.Model):
 
 class MessageManager(models.Manager):
     def active_messages(self, level=None, tags=[]):
-        now = Message.current_datetime()
+        now = current_datetime()
 
         kwargs = {'begins__lte': now}
         if level is not None:
@@ -82,23 +85,22 @@ class Message(models.Model):
     modified = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=50)
     tags = models.ManyToManyField(Tag)
-
-    is_published = models.BooleanField(default=False)
-    group_id = models.CharField(max_length=200, null=True)
     preview_id = models.SlugField(null=True, db_index=True, unique=True)
 
     objects = MessageManager()
 
-    def is_active(self):
-        now = self.current_datetime()
+    def is_active(self, now=current_datetime()):
         return (self.begins is not None and self.begins <= now and (
             self.expires is None or now <= self.expires))
+
+    def has_target_group(self):
+        return self.target_group_id is not None and len(self.target_group_id)
 
     def clean(self):
         self.content = self.sanitize_content(self.content)
 
         if (self.begins is None or self.begins == ''):
-            self.begins = self.current_datetime()
+            self.begins = current_datetime()
 
         if (self.expires is not None and self.expires <= self.begins):
             raise ValidationError('Invalid expires: expires precedes begins')
@@ -128,10 +130,6 @@ class Message(models.Model):
 
     def render(self, context={}):
         return Template(self.content).render(Context(context))
-
-    @staticmethod
-    def current_datetime():
-        return timezone.now()
 
     @staticmethod
     def sanitize_content(content):
