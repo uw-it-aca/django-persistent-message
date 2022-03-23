@@ -85,8 +85,9 @@ class Message(models.Model):
 
     objects = MessageManager()
 
-    def is_active(self):
-        now = self.current_datetime()
+    def is_active(self, now=None):
+        if not now:
+            now = self.current_datetime()
         return (self.begins is not None and self.begins <= now and (
             self.expires is None or now <= self.expires))
 
