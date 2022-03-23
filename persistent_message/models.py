@@ -76,7 +76,7 @@ class Message(models.Model):
         (WARNING_LEVEL, 'Warning'),
         (DANGER_LEVEL, 'Danger'),
     )
-    title = models.TextField(blank=True)
+
     content = models.TextField(blank=True)
     level = models.IntegerField(choices=LEVEL_CHOICES, default=INFO_LEVEL)
     begins = models.DateTimeField()
