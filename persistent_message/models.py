@@ -89,7 +89,7 @@ class Message(models.Model):
         if not now:
             now = self.current_datetime()
         return (self.begins is not None and self.begins <= now and (
-            self.expires is None or now <= self.expires))
+            self.expires is None or now < self.expires))
 
     def clean(self):
         self.content = self.sanitize_content(self.content)
