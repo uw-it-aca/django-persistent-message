@@ -1,4 +1,4 @@
-# Copyright 2021 UW-IT, University of Washington
+# Copyright 2022 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
 from django.db import models
@@ -85,10 +85,11 @@ class Message(models.Model):
 
     objects = MessageManager()
 
-    def is_active(self):
-        now = self.current_datetime()
+    def is_active(self, now=None):
+        if not now:
+            now = self.current_datetime()
         return (self.begins is not None and self.begins <= now and (
-            self.expires is None or now <= self.expires))
+            self.expires is None or now < self.expires))
 
     def clean(self):
         self.content = self.sanitize_content(self.content)
@@ -103,7 +104,7 @@ class Message(models.Model):
         self.full_clean(exclude=['begins', 'modified_by'])
         super(Message, self).save(*args, **kwargs)
 
-    def to_json(self):
+    def to_json(self, now=None):
         return {
             'id': self.pk,
             'content': self.content,
@@ -119,7 +120,7 @@ class Message(models.Model):
                 self.modified is not None) else None,
             'modified_by': self.modified_by,
             'tags': [tag.to_json() for tag in self.tags.all()],
-            'is_active': self.is_active(),
+            'is_active': self.is_active(now),
         }
 
     def render(self, context={}):
