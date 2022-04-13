@@ -1,6 +1,7 @@
-# Copyright 2021 UW-IT, University of Washington
+# Copyright 2022 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
+import unicodedata
 from persistent_message.models import Message, TagGroup, Tag
 from persistent_message.decorators import message_admin_required
 from django.core.exceptions import ValidationError
@@ -105,7 +106,8 @@ class MessageAPI(View):
             raise ValidationError('Invalid JSON: {}'.format(request.body))
 
         if 'content' in json_data:
-            self.message.content = json_data['content']
+            self.message.content = unicodedata.normalize(
+                "NFKD", json_data['content']).strip()
         if 'level' in json_data:
             self.message.level = json_data['level']
         if 'begins' in json_data:
