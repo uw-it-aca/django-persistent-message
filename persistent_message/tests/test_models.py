@@ -128,10 +128,8 @@ class MessageTest(PersistentMessageTestCase):
             'Hello World!')
 
         self.assertEqual(
-            self.message.sanitize_content(
-                '<span style="font-size: 12px; background-image: x; '
-                'color: red;">OK</span>'),
-            '<span style="font-size: 12px; color: red;">OK</span>')
+            self.message.sanitize_content('<span class="info">OK</span>'),
+            '<span class="info">OK</span>')
 
         self.assertEqual(
             self.message.sanitize_content('<i aria-hidden="true"></i>'),

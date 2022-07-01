@@ -13,7 +13,6 @@ MESSAGE_ALLOWED_TAGS = bleach.sanitizer.ALLOWED_TAGS + [
     'br', 'p', 'span', 'h1', 'h2', 'h3', 'h4']
 MESSAGE_ALLOWED_ATTRIBUTES = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
 MESSAGE_ALLOWED_ATTRIBUTES['*'] = ['class', 'style', 'aria-hidden']
-MESSAGE_ALLOWED_STYLES = ['font-size', 'color']
 
 
 class TagGroup(models.Model):
@@ -134,8 +133,7 @@ class Message(models.Model):
     def sanitize_content(content):
         return bleach.clean(content,
                             tags=MESSAGE_ALLOWED_TAGS,
-                            attributes=MESSAGE_ALLOWED_ATTRIBUTES,
-                            styles=MESSAGE_ALLOWED_STYLES)
+                            attributes=MESSAGE_ALLOWED_ATTRIBUTES)
 
     def __str__(self):
         return self.content
