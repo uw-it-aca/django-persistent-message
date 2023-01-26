@@ -7,12 +7,18 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.template import Template, Context
 from django.utils import timezone
-import bleach
+from bleach.sanitizer import Cleaner
 
-MESSAGE_ALLOWED_TAGS = ['br', 'p', 'span', 'h1', 'h2', 'h3', 'h4'].extend(
-    bleach.sanitizer.ALLOWED_TAGS)
-MESSAGE_ALLOWED_ATTRIBUTES = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
-MESSAGE_ALLOWED_ATTRIBUTES['*'] = ['class', 'style', 'aria-hidden']
+MESSAGE_ALLOWED_TAGS = {
+    'a', 'b', 'br', 'p', 'span', 'h1', 'h2', 'h3', 'h4',
+    'li', 'ol', 'ul', 'strong', 'em', 'i'}
+MESSAGE_ALLOWED_ATTRIBUTES = {
+    '*': ['class', 'style', 'title', 'aria-hidden'],
+    'a': ['href', 'rel'],
+    'img': ['alt'],
+}
+cleaner = Cleaner(
+    tags=MESSAGE_ALLOWED_TAGS,attributes=MESSAGE_ALLOWED_ATTRIBUTES)
 
 
 class TagGroup(models.Model):
@@ -131,9 +137,7 @@ class Message(models.Model):
 
     @staticmethod
     def sanitize_content(content):
-        return bleach.clean(content,
-                            tags=MESSAGE_ALLOWED_TAGS,
-                            attributes=MESSAGE_ALLOWED_ATTRIBUTES)
+        return cleaner.clean(content)
 
     def __str__(self):
         return self.content
