@@ -18,7 +18,7 @@ MESSAGE_ALLOWED_ATTRIBUTES = {
     'img': ['alt'],
 }
 cleaner = Cleaner(
-    tags=MESSAGE_ALLOWED_TAGS,attributes=MESSAGE_ALLOWED_ATTRIBUTES)
+    tags=MESSAGE_ALLOWED_TAGS, attributes=MESSAGE_ALLOWED_ATTRIBUTES)
 
 
 class TagGroup(models.Model):
