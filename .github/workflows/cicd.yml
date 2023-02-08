@@ -28,7 +28,7 @@ name: tests
 env:
   APP_NAME: persistent_message
   CONF_PATH: conf
-  COVERAGE_DJANGO_VERSION: 2.2
+  COVERAGE_DJANGO_VERSION: 3.2
 
 on:
   push:
@@ -48,6 +48,8 @@ jobs:
       matrix:
         django-version:
           - '3.2'
+          - '4.0'
+          - '4.1'
 
     steps:
       - name: Checkout Repo

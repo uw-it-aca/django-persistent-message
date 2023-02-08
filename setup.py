@@ -25,7 +25,7 @@ setup(
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'Django<4.0',
+        'Django>=2.2,<5',
         'python-dateutil',
         'bleach<7.0',
     ],
