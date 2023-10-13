@@ -7,18 +7,16 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.template import Template, Context
 from django.utils import timezone
-from bleach.sanitizer import Cleaner
+import nh3
 
 MESSAGE_ALLOWED_TAGS = {
     'a', 'b', 'br', 'p', 'span', 'h1', 'h2', 'h3', 'h4',
     'li', 'ol', 'ul', 'strong', 'em', 'i'}
 MESSAGE_ALLOWED_ATTRIBUTES = {
-    '*': ['class', 'style', 'title', 'aria-hidden'],
-    'a': ['href', 'rel'],
-    'img': ['alt'],
+    '*': {'class', 'style', 'title', 'aria-hidden'},
+    'a': {'href', 'rel'},
+    'img': {'alt'},
 }
-cleaner = Cleaner(
-    tags=MESSAGE_ALLOWED_TAGS, attributes=MESSAGE_ALLOWED_ATTRIBUTES)
 
 
 class TagGroup(models.Model):
@@ -137,7 +135,10 @@ class Message(models.Model):
 
     @staticmethod
     def sanitize_content(content):
-        return cleaner.clean(content)
+        return nh3.clean(content,
+                         tags=MESSAGE_ALLOWED_TAGS,
+                         attributes=MESSAGE_ALLOWED_ATTRIBUTES,
+                         link_rel=None)
 
     def __str__(self):
         return self.content
