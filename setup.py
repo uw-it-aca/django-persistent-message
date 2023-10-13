@@ -25,9 +25,9 @@ setup(
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'Django>=2.2,<5',
+        'Django>=3.2,<5',
         'python-dateutil',
-        'bleach<7.0',
+        'nh3',
     ],
     license='Apache License, Version 2.0',
     description=('Django-Persistent-Message'),
