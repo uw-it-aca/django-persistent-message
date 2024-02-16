@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2024 UW-IT, University of Washington
+=======
+# Copyright 2023 UW-IT, University of Washington
+>>>>>>> d38deb39158b39879b41487248cd8dc7cf847ea9
 # SPDX-License-Identifier: Apache-2.0
 
 import os
@@ -27,7 +31,7 @@ setup(
     install_requires=[
         'Django>3.2,<5',
         'python-dateutil',
-        'bleach~=5.0',
+        'nh3',
     ],
     license='Apache License, Version 2.0',
     description=('Django-Persistent-Message'),

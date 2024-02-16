@@ -148,8 +148,7 @@ class MessageTest(PersistentMessageTestCase):
             '<b><i>x</i></b>')
 
         self.assertEqual(
-            self.message.sanitize_content('<script>alert("x");</script>'),
-            '&lt;script&gt;alert("x");&lt;/script&gt;')
+            self.message.sanitize_content('<script>alert("x");</script>'), '')
 
         self.assertEqual(
             self.message.sanitize_content('<p>Hello World!</p>'),
