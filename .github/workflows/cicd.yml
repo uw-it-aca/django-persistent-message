@@ -28,7 +28,7 @@ name: tests
 env:
   APP_NAME: persistent_message
   CONF_PATH: conf
-  COVERAGE_DJANGO_VERSION: 3.2
+  COVERAGE_DJANGO_VERSION: 4.2
 
 on:
   push:
@@ -42,7 +42,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -57,16 +57,15 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: '3.10'
 
       - name: Install Dependencies
         run: |
-          sudo apt-get install python-dev libxml2-dev libxmlsec1-dev
           python -m pip install --upgrade pip
           pip install -e .
           pip install pycodestyle coverage coveralls==3.3.1
 
-      - name: Upgrade Django Version
+      - name: Install Django ${{ matrix.django-version }}
         run: pip install "Django~=${{ matrix.django-version }}.0"
 
       - name: Setup Django
@@ -87,7 +86,7 @@ jobs:
       - name: Run Tests
         run: |
           python -m compileall ${APP_NAME}/
-          coverage run --source=${APP_NAME}/ manage.py test ${APP_NAME}
+          python -Wd -m coverage run --source=${APP_NAME}/ manage.py test ${APP_NAME}
 
       - name: Report Test Coverage
         if: matrix.django-version == env.COVERAGE_DJANGO_VERSION
@@ -101,7 +100,7 @@ jobs:
 
     needs: test
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout Repo
@@ -110,7 +109,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: '3.10'
 
       - name: Publish to PyPi
         uses: uw-it-aca/actions/publish-pypi@main

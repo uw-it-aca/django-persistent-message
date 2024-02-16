@@ -1,4 +1,4 @@
-# Copyright 2023 UW-IT, University of Washington
+# Copyright 2024 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
 import os
@@ -21,11 +21,11 @@ setup(
     name='Django-Persistent-Message',
     version=VERSION,
     packages=['persistent_message'],
-    author="UW-IT AXDD",
+    author="UW-IT T&LS",
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'Django>=3.2,<5',
+        'Django>3.2,<5',
         'python-dateutil',
         'nh3',
     ],
