@@ -21,11 +21,11 @@ setup(
     name='Django-Persistent-Message',
     version=VERSION,
     packages=['persistent_message'],
-    author="UW-IT T&LS",
+    author="UW-IT Student & Educational Technology Services",
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'Django>3.2,<5',
+        'Django>3.2,<6',
         'python-dateutil',
         'nh3',
     ],
