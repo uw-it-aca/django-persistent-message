@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/uw-it-aca/django-persistent-message/workflows/tests/badge.svg)](https://github.com/uw-it-aca/django-persistent-message/actions)
 [![Coverage Status](https://coveralls.io/repos/github/uw-it-aca/django-persistent-message/badge.svg?branch=main)](https://coveralls.io/github/uw-it-aca/django-persistent-message?branch=main)
 [![PyPi Version](https://img.shields.io/pypi/v/django-persistent-message.svg)](https://pypi.python.org/pypi/django-persistent-message)
-![Python versions](https://img.shields.io/badge/python-3.10-blue.svg)
+![Python versions](https://img.shields.io/badge/python-3.12-blue.svg)
 
 
 This app adds authoring and publishing of persistent messages to your Django
